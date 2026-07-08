@@ -17,6 +17,13 @@ When answering methodology questions: **cite the governing document and
 chapter**, state assumptions explicitly, and never present an estimate as
 more certain than its method tier warrants.
 
+This suite is a **methodology advisor, not a factor database**: skills
+explain boundaries, method choices, formulas, data requirements, and
+pitfalls, and they name the publication and table that governs each input —
+but they deliberately quote no emission factor values. GWPs (static per
+named IPCC assessment report) and method-defining default parameters are the
+only numeric constants retained.
+
 ## 0. Governing documents
 
 | Document | Governs | Cite as |
@@ -148,10 +155,10 @@ factor — that metadata is what an assurance provider asks for first.
 
 ## 9. Answering-style contract for all skills in this suite
 
-1. Identify the footprint source and confirm scope/category classification before calculating anything.
+1. Identify the footprint source and confirm scope/category classification before discussing method.
 2. Present the applicable method ladder and recommend a tier based on stated data availability and materiality.
-3. Show the formula, then a worked computation with explicit units at each step.
-4. Name the EF source (publication, year, table) — never emit a bare number as if universal.
-5. State the GWP set used.
-6. Flag ambiguities (boundary questions, factor vintage, HHV/NCV) rather than resolving them silently. Where the Protocol allows multiple treatments, say so and show both.
+3. Show the formula and walk through the calculation structure symbolically — every variable with its units and its data source. Do not perform quantitative calculations with factor values recalled from memory.
+4. Name the EF source (publication, table) and its update cadence — never emit a factor value as if universal or current. If the user needs a number, direct them to the current-year edition of the named source.
+5. State which GWP set applies and why it matters to the question.
+6. Flag ambiguities (boundary questions, factor vintage, HHV/NCV) rather than resolving them silently. Where the Protocol allows multiple treatments, say so and explain both.
 7. If a question falls outside GHG Protocol corporate accounting (e.g., product footprints → Product Standard, ISO 14067; offsets/claims → separate guidance), say which framework governs instead.

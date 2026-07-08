@@ -1,11 +1,18 @@
 # GHG Protocol Calculation Skill Suite
 
-A set of Claude Code skills that make Claude a one-stop methodology assistant
-for GHG Protocol corporate greenhouse gas accounting. There is one skill per
-footprint source, plus a shared navigator skill (`ghg-protocol`) that holds
-cross-cutting rules: organizational/operational boundaries, GWP sets, biogenic
-treatment, base-year recalculation, emission factor source hierarchy, and data
-quality conventions.
+A set of Claude Code skills that make Claude a one-stop **methodology
+advisor** for GHG Protocol corporate greenhouse gas accounting. There is one
+skill per footprint source, plus a shared navigator skill (`ghg-protocol`)
+that holds cross-cutting rules: organizational/operational boundaries, GWP
+sets, biogenic treatment, base-year recalculation, emission factor source
+hierarchy, and data quality conventions.
+
+The suite is built for discussing methodology, not for running numbers: it
+deliberately quotes **no emission factor values** (which go stale annually),
+instead naming the publication and table that governs each input. The only
+numeric constants retained are GWPs (static per named IPCC assessment
+report) and method-defining default parameters (e.g., screening leak-rate
+ranges, CHP allocation defaults), always labeled with their source.
 
 ## Coverage
 
@@ -43,24 +50,25 @@ Every skill follows the same structure so answers are consistent:
 2. **Method ladder** — the full spectrum of calculation approaches, ordered
    from most data-intensive/most accurate (direct measurement,
    supplier-specific) down to screening-level estimation (proxy intensities,
-   spend-based EEIO). Each rung: when to use it, data required, formula,
-   emission factor sources, a fully worked numeric example, and pitfalls.
-3. **Emission factor quick reference** — representative values, every one
-   labeled with source, vintage, and units.
+   spend-based EEIO). Each rung: when to use it, data required, formula, a
+   symbolic method walk-through showing units and data provenance at every
+   step, and pitfalls.
+3. **Emission factor sources** — the publication and table governing each
+   input, its units convention, and its update cadence (no values quoted).
 4. **Unit and conversion traps**, **data collection & gap-filling**,
-   **QA checks**, and a **worked FAQ**.
+   **QA checks**, and a methodology **FAQ**.
 
 ## Use and limitations
 
 - Ask calculation or methodology questions naturally; Claude routes to the
   right skill. When a question spans sources or you're unsure of the
   category, the `ghg-protocol` navigator handles routing.
-- Emission factors quoted in the skills are labeled reference points
-  (EPA GHG EF Hub, DEFRA/DESNZ, IPCC 2006, eGRID, IEA, GLEC, PCAF, etc.).
-  Factor publications update annually — for inventory-of-record numbers,
-  always pull the current-year value from the named source; the skills tell
-  you exactly which table to check.
+- When a quantitative answer is genuinely needed, the skills point to the
+  current-year edition of the named source (EPA GHG EF Hub, DEFRA/DESNZ,
+  IPCC 2006, eGRID, IEA, GLEC, PCAF, etc.) rather than quoting a value from
+  memory — that keeps answers defensible as factor publications update.
 - The skills implement an answering contract (see `ghg-protocol` §9):
   classify first, recommend a method tier based on data availability and
-  materiality, show units at every step, name factor sources, state the GWP
-  set, and flag ambiguity instead of resolving it silently.
+  materiality, walk through calculation structure with units at every step,
+  name factor sources and cadence, state the GWP set, and flag ambiguity
+  instead of resolving it silently.
