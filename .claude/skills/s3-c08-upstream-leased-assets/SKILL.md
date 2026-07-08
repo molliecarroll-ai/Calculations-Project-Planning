@@ -99,11 +99,11 @@ CO2e = Σ  fuel [units] × fuel EF  +  electricity [kWh] × grid EF
 
 Use standard stationary/mobile combustion factors (EPA Hub, DESNZ) and grid
 factors (eGRID, IEA) — see `s1-stationary-combustion`, `s2-purchased-electricity`
-for factor discipline. **Worked example:** an operating-leased warehouse
-(equity-share boundary, no operational control): 42,000 m³ natural gas ×
-2.04 kgCO2e/m³ (EPA Hub 2024 basis, verify) = 85.7 tCO2e; 610,000 kWh ×
-0.35 kgCO2e/kWh (regional eGRID 2023, verify) = 213.5 tCO2e. **Category 8 ≈
-299 tCO2e.**
+for factor discipline. **Walk-through:** for an operating-leased warehouse
+under an equity-share boundary with no operational control, take metered gas
+(current-year EPA Hub or DESNZ fuel factor, matching the fuel's unit and
+HHV/NCV basis) plus metered kWh (current-year subregional eGRID or national
+grid factor), sum the two lines, and book the total in category 8.
 
 ### Method 2 — Lessor-specific
 

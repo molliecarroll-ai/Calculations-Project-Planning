@@ -98,18 +98,15 @@ Emissions = Σ_assets ( units acquired × cradle-to-gate PCF_asset )
 Embodied = A1–A3 (product) + A4 (transport to site) + A5 (construction process)
 ```
 
-**Worked example:** Data-center refresh: 400 rack servers. Manufacturer LCA
-reports manufacturing + transport ≈ 1,300 kg CO2e per server (e.g., Dell/HPE
-published PCFs for 2U servers commonly fall ~900–2,500 kg CO2e cradle-to-gate
-depending on configuration — use the model-specific PCF; verify).
-
-```
-400 servers × 1,300 kg CO2e = 520,000 kg = 520 t CO2e (year of acquisition)
-```
+**Method walk-through (IT refresh):** pull the manufacturer's PCF for the
+exact model and configuration acquired; strip use phase and end-of-life so
+only manufacturing + delivery remain; multiply by units acquired; book the
+total in the year of acquisition. PCFs are configuration-sensitive
+(memory/storage count can roughly double a server PCF) — match the
+configuration, not just the model family.
 
 **Pitfalls:** PCFs often report *whole-life* totals with a use-phase share —
-strip use phase (that's your scope 2) and end-of-life; configuration
-sensitivity (memory/SSD count can double a server PCF); GWP set and biogenic
+strip use phase (that's your scope 2) and end-of-life; GWP set and biogenic
 conventions differ across manufacturers.
 
 ### Method 2 — Average-data (per unit / per m² / per mass)
@@ -124,27 +121,16 @@ Benchmark sources: RICS/LETI/CRREM embodied-carbon benchmarks for buildings;
 ecoinvent datasets for machinery per kg; ICE database (Univ. of Bath) for
 construction materials; manufacturer-class averages for IT and vehicles.
 
-**Worked example (office construction):** 12,000 m² new office, benchmark
-500 kg CO2e/m² GIA upfront embodied carbon (A1–A5) — typical office range
-~300–800 kg CO2e/m² (LETI/RICS benchmarks, UK-oriented, 2020s vintage —
-verify against current benchmark editions and your structural system).
-
-```
-12,000 m² × 500 kg CO2e/m² = 6,000,000 kg = 6,000 t CO2e
-```
-
-**Worked example (machinery by mass):** 85 t of industrial machinery
-purchased; generic machinery factor ~3.5 t CO2e/t machinery (ecoinvent
-"machine, industrial" class datasets — order of magnitude; verify dataset).
-
-```
-85 t × 3.5 t CO2e/t = 298 t CO2e
-```
+**Method walk-through (office construction):** take the building's gross
+internal area (m² GIA); select an upfront embodied-carbon benchmark (A1–A5,
+kg CO2e/m²) from the current LETI/RICS edition that matches the building type
+and structural system; multiply and book in the acquisition/completion year,
+stating the module scope and area definition used.
 
 **Pitfalls:** benchmark scope varies (A1–A3 vs A1–A5 vs whole-life) — match
-and state modules; structural system (timber vs concrete vs steel) shifts
-buildings 2×; per-mass machinery factors are crude — prefer spend-based if
-mass is estimated anyway.
+and state modules; structural system (timber vs concrete vs steel) can shift
+building benchmarks roughly twofold; per-mass machinery factors are crude —
+prefer spend-based if mass is estimated anyway.
 
 ### Method 3 — Spend-based (EEIO by asset class)
 
@@ -160,17 +146,11 @@ manufacturing; IT → computer/electronics manufacturing. Apply the same
 inflation, currency, tax-removal, and purchaser-price rules as Category 1
 (see the `s3-c01-purchased-goods-services` skill and Unit traps below).
 
-**Worked example:** 2025 capex additions: $20M construction, $7M machinery,
-$3M IT hardware. Illustrative EPA Supply Chain Factors v1.3 (kg CO2e per
-2022 USD, purchaser price — verify): construction ~0.30, machinery ~0.30,
-computers ~0.15. Deflate 2025→2022 by 1.09 (illustrative index).
-
-```
-Construction: 20.0M ÷ 1.09 × 0.30 kg/$ = 5,505 t CO2e
-Machinery:     7.0M ÷ 1.09 × 0.30 kg/$ = 1,927 t CO2e
-IT:            3.0M ÷ 1.09 × 0.15 kg/$ =   413 t CO2e
-Category 2 total                        ≈ 7,845 t CO2e
-```
+**Method walk-through:** extract reporting-year additions by asset class from
+the fixed-asset register; strip land, capitalized labor/interest, and
+intangibles; deflate each class to the EEIO factor's dollar-year; multiply by
+the current-release factor for the producing industry; sum, documenting
+release, dollar-year, and deflator per class.
 
 **Pitfalls:** using total capex including land and capitalized labor/interest
 (strip non-goods components); asset register "additions" vs cash capex timing
@@ -185,22 +165,19 @@ and optionally show a multi-year average as *supplemental* information. The
 reported inventory number itself must remain the undepreciated
 year-of-acquisition total.
 
-## Emission factors quick reference
+## Emission factor sources
 
-Representative, rounded values — verify against current publications.
+| Source | Governing table | Coverage | Units convention | Cadence |
+|---|---|---|---|---|
+| LETI / RICS embodied-carbon benchmarks | Benchmark tables by building type (upfront, A1–A5) | Buildings, UK-oriented; check applicability | kg CO2e per m² (state GIA/NIA/GEA and module scope) | Periodic editions — verify current |
+| Manufacturer PCF libraries (Dell, HPE, Lenovo, Apple, OEM LCAs) | Model-specific PCF documents | IT hardware, vehicles; configuration-specific | kg CO2e per unit, cradle-to-gate (strip use phase/EOL) | Per model release |
+| ICE database (Univ. of Bath) | Material embodied-carbon tables | Construction materials | kg CO2e per kg of material | Versioned releases |
+| ecoinvent | Machinery/vehicle/material datasets | Global, geography-specific | kg CO2e per kg or unit, cradle-to-gate | Versioned releases — state version |
+| EPA Supply Chain GHG Emission Factors (USEEIO-based) | Producing-industry commodity factors | US, spend-based capex screening | kg CO2e per USD of a stated dollar-year, purchaser price | Per USEEIO release — verify current |
+| EPDs (EN 15804) | Product-specific declarations | Construction products | Per declared unit, by module | Per publication; check validity |
 
-| Asset class | Factor | Source & vintage |
-|---|---|---|
-| Office building, upfront embodied (A1–A5) | ~300–800 kg CO2e/m² GIA | LETI/RICS benchmarks (2020–2023 editions) — verify |
-| Warehouse/industrial shed | ~200–400 kg CO2e/m² | LETI/CRREM-adjacent benchmarks — verify |
-| 2U rack server (cradle-to-gate) | ~900–2,500 kg CO2e/unit | Manufacturer PCFs (Dell, HPE, Lenovo; 2020s) — use model-specific |
-| Laptop (cradle-to-gate) | ~200–350 kg CO2e/unit | Manufacturer PCFs (2020s) — verify model |
-| Passenger vehicle manufacture | ~5–10 t CO2e/vehicle (ICE); BEV higher (battery) | OEM LCAs / ecoinvent — verify |
-| Nonresidential construction (spend) | ~0.3 kg CO2e/2022 USD | EPA Supply Chain Factors v1.3 — verify |
-| Machinery manufacturing (spend) | ~0.3 kg CO2e/2022 USD | EPA SEF v1.3 — verify |
-| Computer/electronics mfg (spend) | ~0.1–0.2 kg CO2e/2022 USD | EPA SEF v1.3 — verify |
-| Structural steel (material) | ~1.7–2.5 kg CO2e/kg | ICE db v3 / worldsteel — verify |
-| Ready-mix concrete | ~0.10–0.15 kg CO2e/kg | ICE db v3 / EPDs — verify mix design |
+This skill intentionally quotes no factor values. When a quantitative answer
+is needed, pull the current-year value from the named source.
 
 ## Unit and conversion traps
 
@@ -259,12 +236,11 @@ Representative, rounded values — verify against current publications.
 
 ## Worked FAQ
 
-**Q1. Can we spread our new plant's 40,000 t CO2e over its 25-year life
-(1,600 t/yr)?**
+**Q1. Can we spread our new plant's embodied emissions over its 25-year life?**
 No. The Scope 3 Calculation Guidance (Category 2) explicitly prohibits
-depreciating/amortizing capital-goods emissions. Report 40,000 t CO2e in the
-acquisition year and add a lumpiness disclosure; a multi-year average may be
-shown only as supplemental information.
+depreciating/amortizing capital-goods emissions. Report the full
+cradle-to-gate total in the acquisition year and add a lumpiness disclosure;
+a multi-year average may be shown only as supplemental information.
 
 **Q2. We leased 30 forklifts (operating lease). Category 2?**
 No — you didn't acquire them. Their operation under your control is
@@ -273,27 +249,30 @@ lessor. If instead you finance-lease them onto your balance sheet, treating
 the embodied emissions under the Category 2 logic in year one is the
 consistent reading — state your treatment.
 
-**Q3. Screening estimate for $12M of 2025 machinery capex?**
-$12M ÷ 1.09 (2025→2022 deflator, illustrative) × ~0.30 kg CO2e/2022 USD
-(EPA SEF v1.3, machinery mfg, purchaser price — verify) ≈ **3,300 t CO2e**.
+**Q3. How do we screen a year of machinery capex?**
+Spend-based method: take machinery-class additions from the fixed-asset
+register, strip non-goods components, deflate to the EEIO factor's
+dollar-year, and multiply by the machinery-manufacturing factor from the
+current EPA Supply Chain release (purchaser price). Refine the largest assets
+with manufacturer PCFs if material.
 
-**Q4. Our building LCA reports 62 kg CO2e/m²/yr whole-life. Usable?**
-Not directly — that's an annualized whole-life intensity including
-operational energy (your future scope 2). Extract the upfront embodied
-modules (A1–A5) as a total kg CO2e/m², multiply by GIA, and book it in the
-acquisition/completion year.
+**Q4. Our building LCA reports an annualized whole-life intensity
+(kg CO2e/m²/yr). Usable?**
+Not directly — that's a whole-life figure including operational energy (your
+future scope 2). Extract the upfront embodied modules (A1–A5) as a total
+kg CO2e/m², multiply by GIA, and book it in the acquisition/completion year.
 
-**Q5. We bought a used stamping press for $800k. Include it?**
+**Q5. We bought a used stamping press. Include it?**
 The Guidance permits either excluding second-hand goods (embodied emissions
 were accounted at first sale) or including them; excluding with disclosure is
 the common choice. Refurbishment materials/work purchased are Category 1/2
 per capitalization treatment either way.
 
-**Q6. 1,500 laptops at ~280 kg CO2e each (manufacturer PCF, cradle-to-gate)
-— Cat 1 or Cat 2, and how much?**
+**Q6. 1,500 laptops with manufacturer PCFs — Cat 1 or Cat 2?**
 If your policy capitalizes them (common above per-unit thresholds or as a
-pooled asset), Category 2; if expensed, Category 1. Either way:
-1,500 × 280 kg = **420 t CO2e**, counted once, in the acquisition year.
+pooled asset), Category 2; if expensed, Category 1. Either way the method is
+units × model-specific cradle-to-gate PCF, counted once, in the acquisition
+year — never in both categories.
 
 ## References
 

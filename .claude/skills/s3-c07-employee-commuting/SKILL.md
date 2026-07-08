@@ -35,10 +35,10 @@ style) live in the `ghg-protocol` skill.
 - **Teleworking / homeworking**: incremental home energy (heating/cooling and
   office equipment) attributable to working from home. The Guidance predates
   mass hybrid work; post-2020 practice is to include it when remote FTE-days
-  are material, using the **DEFRA homeworking factor** (first published in the
-  2020 conversion-factor set; ~0.33 kgCO2e per FTE working-hour in the 2024
-  vintage — verify current) or a bottom-up kWh model: (heating share + equipment
-  kWh per FTE-day) × home-energy EFs. Disclose inclusion either way; a company
+  are material, using the **DEFRA homeworking factor** (per FTE working-hour,
+  published annually in the conversion-factor set since 2020) or a bottom-up
+  kWh model: (heating share + equipment kWh per FTE-day) × home-energy EFs.
+  Disclose inclusion either way; a company
   that halves commuting via remote work but omits homeworking overstates the
   reduction.
 
@@ -114,22 +114,19 @@ Non-response is assumed to mirror respondents — state this assumption; if
 respondents skew (e.g., cyclists over-respond to green surveys), reweight or
 flag.
 
-**Worked example.** Site with 1,000 FTE; 400 respond. Respondent totals
-(annualized, one-way distance × 2 × on-site days):
+**Method walk-through.**
 
-```
-Car (avg 1.1 occupancy):  2,900,000 vehicle-km
-Bus:                        310,000 passenger-km
-Rail/metro:                 640,000 passenger-km
-Cycle/walk:                 180,000 km (EF = 0)
-
-Car:  2,900,000 vkm × 0.168 kgCO2e/vkm (DESNZ 2024 average car; verify) = 487.2 tCO2e
-Bus:    310,000 pkm × 0.102 kgCO2e/pkm (DESNZ 2024 local bus; verify)   =  31.6 tCO2e
-Rail:   640,000 pkm × 0.035 kgCO2e/pkm (DESNZ 2024 national rail)       =  22.4 tCO2e
-Respondent subtotal = 541.2 tCO2e
-Extrapolate: 541.2 × (1,000 ÷ 400) = 1,353 tCO2e
-Per-FTE check: 1.35 tCO2e/FTE — plausible for a car-heavy suburban site.
-```
+1. Annualize each respondent: one-way distance × 2 × on-site days/yr,
+   binned by mode (and by fuel type for cars, if asked).
+2. Aggregate to mode totals in the correct unit basis — vehicle-km for
+   cars/motorcycles (pooled riders collapsed into vehicles by reported
+   occupancy), passenger-km for transit, zero for cycle/walk.
+3. Apply current-year mode factors: DEFRA "Business travel — land" (car by
+   size/fuel, local bus, rail, underground) or EPA Hub commuting factors for
+   US populations; CO2e = Σ_modes activity × EF_mode / 1000.
+4. Extrapolate the respondent subtotal to the stratum:
+   × (total FTE ÷ respondent FTE), per site or region.
+5. Sanity-check the implied tCO2e/FTE against the QA ranges below.
 
 **Pitfalls:** respondents reporting round-trip distance when asked one-way
 (pilot the question); hybrid workers answering pre-pandemic habits; applying
@@ -145,26 +142,24 @@ CO2e = Σ_sites  headcount × Σ_modes [ share_m × avg one-way distance_m [km] 
 ```
 
 **Statistics sources:** US — Census ACS commuting tables (mode share, mean
-one-way travel time; NHTS for distances, ~mean one-way commute ≈ 19–20 km);
-UK — Census travel-to-work + National Travel Survey; EU national travel
-surveys. **Working days**: ~250 weekdays − leave/holiday/sick ≈ **220–230
-days/yr** full-time on-site; multiply by average on-site fraction for hybrid
-policies (e.g., 3 days/week policy → ×0.6). Document every parameter.
+one-way travel time; NHTS for mean one-way distances); UK — Census
+travel-to-work + National Travel Survey; EU national travel surveys.
+**Working days**: ~250 weekdays − leave/holiday/sick ≈ **220–230 days/yr**
+full-time on-site; multiply by average on-site fraction for hybrid policies
+(e.g., 3 days/week policy → ×0.6). Document every parameter.
 
-**Worked example.** 500-FTE US office, no survey. Assume (ACS/NHTS-informed;
-verify locally): 76% drive alone, 9% carpool (occ 2.2), 5% transit, 10%
-remote-heavy/walk. One-way 19 km; 225 potential days × 60% on-site (hybrid) =
-135 days.
+**Method walk-through.**
 
-```
-Drive-alone: 500×0.76=380 × 19×2×135 = 1,949,400 vkm × 0.335 kgCO2e/vmi→per-km:
-  use EPA passenger-car ≈ 0.21 kgCO2e/km (EPA Hub 2024, gasoline car; verify)
-  = 409.4 tCO2e
-Carpool: 45 × 19×2×135 = 230,850 vkm ÷ 2.2 occ… (carpool: count vehicle-km once:
-  45 pax ÷ 2.2 = 20.5 vehicles × 5,130 km = 105,165 vkm × 0.21 = 22.1 tCO2e)
-Transit: 25 × 19×2×135 = 128,250 pkm × 0.10 (bus mix; verify) = 12.8 tCO2e
-Total ≈ 444 tCO2e  → 0.89 tCO2e/FTE (plausible US suburban)
-```
+1. For each site, take headcount from HR and pull the geography's mode
+   shares and mean one-way distance from the national statistics above.
+2. Set annual commuting days: net working days × on-site fraction from the
+   hybrid policy (or badge data).
+3. Per mode: people_m = headcount × share_m; activity_m = people_m ×
+   one-way distance × 2 × days. Convert carpool passengers to vehicles
+   (÷ occupancy) before applying a vehicle-km car factor; leave transit in
+   passenger-km.
+4. Apply current-year mode factors (EPA Hub for US, DEFRA land tables for
+   UK/EU) and sum; check the implied tCO2e/FTE against the QA ranges.
 
 ### Telework add-on
 
@@ -173,35 +168,32 @@ CO2e = remote FTE-days × hours/day × homeworking EF [kgCO2e/FTE-hour] / 1000
   or  = remote FTE-days × homeworking EF [kgCO2e/FTE-day] / 1000
 ```
 
-DESNZ 2024 homeworking factor ≈ **0.33 kgCO2e/FTE-hour** (office equipment +
-share of home heating; UK grid/gas mix; first vintage 2020; verify current
-and geographic fit — for non-UK, build bottom-up: equipment ~0.15 kWh/h ×
-local grid EF + heating increment in heating season). **Worked example:**
-1,000 FTE × 2 remote days/week × 46 weeks = 92,000 FTE-days × 8 h × 0.33
-kgCO2e/h = 242,880 kgCO2e ≈ **243 tCO2e**. **Pitfall:** applying the UK
-factor to mild/electric-heat geographies without adjustment; double counting
-the heating term for employees who would heat the home anyway — DEFRA's
-method already takes an incremental view; state your basis.
+The DEFRA/DESNZ homeworking factor (per FTE-hour; office equipment + a
+share of home heating; built on UK grid/gas mix; published annually since
+2020) is the standard published option — check geographic fit; for non-UK
+populations, build bottom-up: equipment load [kWh/h] × hours × local grid EF
++ a heating increment in the heating season. **Walk-through:** remote
+FTE-days = FTE × remote days/week × weeks worked; multiply by hours/day and
+the current-year per-hour factor. **Pitfall:** applying the UK factor to
+mild/electric-heat geographies without adjustment; double counting the
+heating term for employees who would heat the home anyway — DEFRA's method
+already takes an incremental view; state your basis.
 
-## Emission factors quick reference
+## Emission factor sources
 
-Representative values — label, verify current vintage before use.
-
-| Mode | EF | Units | Source/vintage |
-|---|---|---|---|
-| Average car (unknown fuel) | ~0.17 | kgCO2e/vehicle-km | DESNZ 2024 |
-| US gasoline passenger car | ~0.34 (~0.21/km) | kgCO2e/vehicle-mile | EPA Hub 2024 |
-| Motorcycle (average) | ~0.11 | kgCO2e/vehicle-km | DESNZ 2024 |
-| Local bus | ~0.10 | kgCO2e/passenger-km | DESNZ 2024 |
-| National rail (UK) | ~0.035 | kgCO2e/passenger-km | DESNZ 2024 |
-| London Underground | ~0.028 | kgCO2e/passenger-km | DESNZ 2024 |
-| US transit bus | ~0.06–0.07/pkm | kgCO2e/passenger-km | EPA Hub 2024 (per passenger-mile ~0.10) |
-| Battery EV car (UK grid) | ~0.05 | kgCO2e/vehicle-km | DESNZ 2024 (scope 3 of employee; grid-dependent) |
-| Homeworking | ~0.33 (≈0.30–0.34 across vintages) | kgCO2e/FTE-hour | DESNZ 2020–2024 |
+| Source | Governing table | Coverage | Units convention | Cadence |
+|---|---|---|---|---|
+| UK DESNZ/DEFRA GHG Conversion Factors | "Business travel — land" | Cars by size/fuel (incl. hybrid, PHEV, BEV), motorcycles, local bus, coach, national rail, underground, tram, taxi | kgCO2e per vehicle-km (cars/motorcycles) or passenger-km (transit) — check per row | Annual |
+| UK DESNZ/DEFRA GHG Conversion Factors | "Homeworking" tab (2020 onward) | Incremental home-office energy (equipment + heating share), UK grid/gas basis | kgCO2e per FTE working-**hour** | Annual |
+| US EPA GHG Emission Factors Hub | Commuting/travel tables | Passenger cars by fuel, transit bus, commuter rail; CO2, CH4, N2O published separately | per vehicle-mile / passenger-mile — convert units and GWP-weight per your inventory's GWP set | Annual |
+| National transit operators / agencies | Sustainability disclosures | Supplier-specific transit intensities | per passenger-km | Varies |
 
 Note on employee EVs: the employee's home charging is still category 7 for
 the reporter (it is the employee's purchased electricity, not the reporter's
 scope 2); use a per-km EV factor built on the local grid mix.
+
+This skill intentionally quotes no factor values. When a quantitative answer
+is needed, pull the current-year value from the named source.
 
 ## Unit and conversion traps
 
@@ -251,39 +243,42 @@ scope 2); use a per-km EV factor built on the local grid mix.
 
 ## Worked FAQ
 
-**Q1. Quick screen: 2,500 employees, no survey.** Average-data: assume 18 km
-one-way, 75% car / 25% low-carbon mix, 210 on-site days (hybrid-adjusted),
-car 0.17 kgCO2e/vkm: 2,500 × 0.75 × 18 × 2 × 210 × 0.17 / 1000 ≈ **2,410
-tCO2e** (plus a small transit term ≈ 2,500×0.25×18×2×210×0.06/1000 ≈ 284
-tCO2e) → ~**2,700 tCO2e**, ~1.1 tCO2e/FTE — in range. Screening grade;
-survey if material.
+**Q1. Quick screen with no survey — what is the recipe?** Average-data:
+headcount × national mode shares (ACS/NTS for the geography) × mean one-way
+distance (NHTS/NTS) × 2 × hybrid-adjusted on-site days × current-year mode
+factors, summed over modes. Document each parameter and its statistical
+source, check the implied tCO2e/FTE against the QA ranges, and treat the
+result as screening grade — survey if the category is material.
 
 **Q2. We moved to 3 days/week in office. How do we adjust last year's
 survey-based figure?** Scale commuting days: prior on-site fraction (say
-100%) → 0.6, so commuting term × 0.6; add telework term for the 2
-days/week: FTE × 2 × 46 wks × 8 h × 0.33 kgCO2e/h. Disclose as an activity
-change (no base-year recalc — real-world change, `ghg-protocol` §6).
+100%) → 0.6, so commuting term × 0.6; add a telework term for the 2
+days/week: FTE × 2 days × weeks worked × hours/day × the current homeworking
+factor. Disclose as an activity change (no base-year recalc — real-world
+change, `ghg-protocol` §6).
 
 **Q3. Is telework mandatory to report?** No — optional under the Scope 3
 Standard/Guidance. But if remote days are a large share of working time,
 omitting it while claiming commuting reductions is misleading; include it or
 justify exclusion. Cite the DEFRA homeworking factor and vintage when used.
 
-**Q4. An employee carpools with 2 colleagues, 30 km one-way, 140 on-site
-days.** One vehicle: 30 × 2 × 140 = 8,400 vkm × 0.17 = 1,428 kgCO2e total ≈
-**0.48 tCO2e per person** (÷3). Booking 3 × full vehicle-km would triple-count.
+**Q4. How is a 3-person carpool counted?** As one vehicle: annual vehicle-km
+= one-way distance × 2 × on-site days for the shared vehicle, × the car
+factor, then attributed across the three riders (÷ occupancy) if reporting
+per person. Booking each rider at full vehicle-km would triple-count — this
+is why the survey asks for carpool occupancy.
 
 **Q5. Our company runs its own employee shuttle buses.** The shuttles' diesel
 is **scope 1** (owned/operated), not category 7. Employees' travel from home
 to the shuttle stop in their own cars remains category 7. A contracted
 third-party shuttle would instead sit in category 7.
 
-**Q6. Multimodal commuter: drives 8 km to a station, then 35 km by rail,
-190 on-site days.** Compute each segment with its own factor:
-car 8 × 2 × 190 = 3,040 vkm × 0.17 = 517 kgCO2e; rail 35 × 2 × 190 =
-13,300 pkm × 0.035 = 466 kgCO2e. Total ≈ **0.98 tCO2e/yr**. Collapsing the
-whole 43 km to "rail" would understate by ~35%; to "car" would overstate
-~2.9×. This is why the survey asks for a secondary mode.
+**Q6. How do we handle a multimodal commuter (drive to station, then
+rail)?** Compute each segment with its own distance and its own mode factor
+— car segment in vehicle-km, rail segment in passenger-km. Collapsing the
+whole trip to "rail" materially understates (the car leg is far more
+intensive per km); collapsing to "car" materially overstates. This is why
+the survey asks for a secondary mode and per-segment distances.
 
 **Q7. Survey response was 12% — can we still use it?** Use with caution:
 extrapolate but flag the response rate, compare mode split against national

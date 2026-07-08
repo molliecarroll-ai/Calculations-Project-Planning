@@ -6,7 +6,8 @@ description: >-
   class and distance-band factors, rail, taxi and rideshare, rental cars,
   personal-car mileage reimbursement, hotel stays, and travel agency (TMC)
   booking data. Covers distance-based, fuel-based, and spend-based methods,
-  DEFRA travel factors, and great-circle distance uplift conventions.
+  emission factor source selection (DEFRA/DESNZ, EPA Hub), and great-circle
+  distance uplift conventions.
 ---
 
 # Scope 3 Category 6 — Business Travel
@@ -63,18 +64,20 @@ vehicles), allocated to the reporter's travelers:
   RF multiplier; it is an **optional** adjustment. Common practice: apply
   DEFRA's "with RF" air factors (multiplier ≈ **1.9** on the CO2 component,
   DESNZ methodology) or report without RF. **Whichever you choose, disclose
-  it and keep it consistent across years** — switching silently moves air
-  emissions ~±47%. Some frameworks (e.g., UK SECR guidance) expect with-RF.
+  it and keep it consistent across years** — a silent switch moves air
+  emissions by nearly a factor of two. Some frameworks (e.g., UK SECR
+  guidance) expect with-RF.
 - **Distance bands** (DEFRA convention): domestic (within UK, used generically
   for short domestic hops), short-haul international (<~3,700 km), long-haul
   international (≥~3,700 km). Per-pkm factors differ because
   takeoff/landing fuel is amortized over different distances — domestic per-km
   factors are the *highest*.
-- **Cabin class**: premium cabins occupy more floor area per seat, so factors
-  scale roughly: premium economy ~1.6×, business ~2.9×, first ~4× economy on
-  long-haul (DEFRA class ratios; verify current). A business-class-heavy
-  travel program can double its air footprint versus an all-economy
-  assumption.
+- **Cabin class**: premium cabins occupy more floor area per seat, so
+  per-pkm factors scale up by class — premium economy modestly above economy,
+  business roughly 2–4× economy, first the highest (DEFRA derives the class
+  ratios from seat-area allocation; pull current ratios from the DEFRA
+  methodology paper). A business-class-heavy travel program can double its
+  air footprint versus an all-economy assumption.
 - **Great-circle distance (GCD) + uplift**: distances computed from
   origin-destination (O-D) airport pairs via GCD understate actual track flown
   (routing, holding, stacking). Apply an uplift of **~8–9%** (DEFRA
@@ -106,8 +109,9 @@ CO2e = Σ  fuel [litres] × fuel EF [kgCO2e/litre] / 1000        (whole vehicle)
 allocate to reporter: × (your passengers ÷ total passengers)    if shared
 ```
 
-Jet A: ~2.54 kgCO2/litre combustion (≈3.16 kgCO2/kg fuel; EPA/DEFRA fuel
-tables — verify). **Pitfall:** a charter your company exclusively pays for but
+Fuel EFs come from the standard fuel-combustion tables (EPA GHG Emission
+Factors Hub; DEFRA/DESNZ "Fuels" tab — per litre or per kg, updated
+annually). **Pitfall:** a charter your company exclusively pays for but
 does not operate is still category 6 (whole-flight fuel, no per-passenger
 division); an *owned/operated* aircraft is scope 1.
 
@@ -130,26 +134,24 @@ stay" tables (annual, kgCO2e/pkm with and without RF); US EPA GHG Emission
 Factors Hub travel factors (per passenger-mile, no RF variant published);
 national rail operators' disclosures for supplier-specific rail.
 
-**Worked example — one long-haul trip.** Round trip LHR→JFK in business
-class, 1 traveler. GCD ≈ 5,540 km one way.
+**Method walk-through — an air itinerary.**
 
-```
-Distance: 5,540 km × 2 legs × 1.08 uplift = 11,966 pkm
-Without RF: 11,966 pkm × 0.2338 kgCO2e/pkm (DESNZ 2024, long-haul business, no RF; verify)
-          = 2,798 kgCO2e ≈ 2.80 tCO2e
-With RF:    11,966 pkm × 0.4438 kgCO2e/pkm (DESNZ 2024, with RF; verify)
-          = 5,311 kgCO2e ≈ 5.31 tCO2e
-```
+1. Extract leg-level records from the TMC export: origin and destination
+   airport per leg, cabin class, traveler count, ticket status.
+2. Compute great-circle distance per leg from the O-D airport pair; apply
+   the ~8% uplift: distance = GCD × 1.08 (skip if the distance engine
+   already uplifts).
+3. Convert to passenger-km: pkm = distance × travelers on the leg (each leg
+   of a round trip counted separately; each traveler counted separately).
+4. Select the factor: current-year DEFRA/DESNZ "Business travel — air"
+   table, keyed by haul band (from leg distance) and cabin class, using the
+   with-RF or without-RF variant per your disclosed convention.
+5. CO2e = Σ_legs pkm × EF / 1000; label the RF basis on the result.
 
-Same trip in economy (no RF): 11,966 × 0.0806 = **0.96 tCO2e** — the cabin
-class tripled it. Add 4 US hotel nights: 4 × 16.1 kgCO2e/night (DESNZ 2024
-US hotel factor; verify) = 64 kgCO2e.
-
-**Worked example — mileage reimbursement.** Employees claimed 480,000 miles
-in personal cars. 480,000 mi × 1.609 = 772,320 vehicle-km × 0.168 kgCO2e/km
-(DESNZ 2024 "average car, unknown fuel"; verify; US fleets: consider EPA
-average passenger-car factor instead for geographic fit) = 129,750 kgCO2e ≈
-**129.7 tCO2e**. Mileage claims are vehicle-km — do not divide by occupancy.
+Mileage-reimbursement claims plug into the car line directly: claimed
+distance is already vehicle-km (convert miles × 1.609 first) × a current-year
+average-car factor (DEFRA "Business travel — land"; EPA Hub for US fleets for
+geographic fit). Do not divide by occupancy.
 
 **Pitfalls:** counting a round trip once; per-mile factors applied to km;
 applying air pkm factors to *flights* rather than *passengers* (3 colleagues
@@ -183,36 +185,19 @@ and the untracked tail only.
   air spend; estimate untracked bookings spend-based or by ratio uplift, and
   disclose the gap-fill.
 
-## Emission factors quick reference
+## Emission factor sources
 
-Representative values, **DESNZ/DEFRA 2024 GHG Conversion Factors, kgCO2e per
-passenger-km, AR5 GWPs** — vintage moves these every year (RF-inclusive values
-have ranged ~0.19–0.30 for long-haul economy across recent vintages);
-**always pull the current table**.
+| Source | Governing table | Coverage | Units convention | Cadence |
+|---|---|---|---|---|
+| UK DESNZ/DEFRA GHG Conversion Factors | "Business travel — air" | Air by haul band (domestic, short-haul intl, long-haul intl) and cabin class; with-RF and without-RF variants | kgCO2e per passenger-km | Annual |
+| UK DESNZ/DEFRA GHG Conversion Factors | "Business travel — land" / "— sea" | Rail (national, underground, international), coach, taxi, ferries; cars by size/fuel incl. EVs | pkm for shared modes; vehicle-km for cars/taxis (check per row) | Annual |
+| UK DESNZ/DEFRA GHG Conversion Factors | "Hotel stay" | Per-room-night factors by country of stay | kgCO2e per room-night | Annual |
+| US EPA GHG Emission Factors Hub | Business travel tables | Air (short/medium/long haul), rail, vehicles; CO2, CH4, N2O published separately; no RF variant | per passenger-mile / vehicle-mile — convert units and GWP-weight gases per your inventory's GWP set | Annual |
+| USEEIO / EXIOBASE | Air transportation, ground transit, accommodation sectors | Spend-based screening factors | kgCO2e per currency unit (inflation- and currency-adjust) | Model releases |
+| National rail operators' disclosures | Operator sustainability reports | Supplier-specific rail | per passenger-km | Varies |
 
-| Mode | Without RF | With RF |
-|---|---|---|
-| Air, domestic, average pax | ~0.15 | ~0.27 |
-| Air, short-haul intl, economy | ~0.08 | ~0.15 |
-| Air, long-haul intl, economy | ~0.08 (2024: 0.0806) | ~0.15 (2024: 0.1531) |
-| Air, long-haul intl, business | ~0.23 | ~0.44 |
-| Air, long-haul intl, first | ~0.32 | ~0.61 |
-| National rail (UK) | ~0.035 | — |
-| Coach | ~0.027 | — |
-| Taxi (regular, per pkm) | ~0.15 | — |
-| Average car (per vehicle-km) | ~0.17 | — |
-
-| Hotels (DESNZ 2024, kgCO2e/room-night) | |
-|---|---|
-| UK | ~10.4 |
-| US | ~16.1 |
-| Australia | ~19 |
-| (Country list in DEFRA "Hotel stay" tab; use country of stay) | verify current |
-
-US alternative: EPA GHG Emission Factors Hub publishes air (short/medium/long
-haul), rail, and vehicle factors per passenger-mile / vehicle-mile, CO2, CH4,
-N2O separately, no RF — convert units and add GWP-weighted gases per your
-inventory's GWP set.
+This skill intentionally quotes no factor values. When a quantitative answer
+is needed, pull the current-year value from the named source.
 
 ## Unit and conversion traps
 
@@ -267,11 +252,14 @@ inventory's GWP set.
 
 ## Worked FAQ
 
-**Q1. 2,000,000 economy short-haul pkm and 3,500,000 long-haul economy pkm,
-no RF, DESNZ 2024 (verify).**
-Short-haul: 2,000,000 × 0.0794 kgCO2e/pkm ≈ 158.8 tCO2e. Long-haul:
-3,500,000 × 0.0806 ≈ 282.1 tCO2e. **Total ≈ 441 tCO2e without RF; ≈ 838
-tCO2e with RF** (0.1513/0.1531 factors). Disclose which is reported.
+**Q1. We have annual passenger-km totals by haul band and class from our
+TMC — how do we turn them into emissions?**
+Apply the current-year DEFRA/DESNZ "Business travel — air" factor for each
+band × class combination, summing across bands. Compute with-RF and
+without-RF totals in parallel from the two factor variants, report per your
+disclosed RF convention, and label the basis on every air figure. If class
+is missing, default to economy or "average passenger" and disclose the
+default and its direction of bias.
 
 **Q2. Should we apply the 1.9 RF multiplier?** Optional under the GHG
 Protocol; not required, not prohibited. Decide once, apply to all air travel,
@@ -279,22 +267,27 @@ disclose, and hold constant across years (changing it later = document as a
 methodology change; recalc base year if significant per `ghg-protocol` §6).
 If reporting under UK SECR or to buyers who expect RF, include it.
 
-**Q3. Employee drove her own car 1,200 miles to client sites; we reimbursed
-mileage.** Category 6, distance-based: 1,200 mi × 1.609 = 1,931 vehicle-km ×
-0.168 kgCO2e/km (DESNZ 2024 average car; verify) ≈ **0.32 tCO2e**. Her daily
-commute stays in category 7.
+**Q3. An employee drove her own car to client sites; we reimbursed
+mileage. Where does it go and how is it calculated?** Category 6,
+distance-based. Mileage claims are already vehicle-distance: convert miles
+to km (× 1.609) if needed, apply a current-year average-car (or fuel/size-
+specific, if known) factor from DEFRA "Business travel — land" — or the EPA
+Hub passenger-car factor for US fleets for geographic fit — with no
+occupancy division. Her daily commute stays in category 7.
 
-**Q4. Our TMC covers 80% of air spend; expense data shows another $250k
-booked directly.** Compute TMC air distance-based; gap-fill the $250k
-spend-based (e.g., USEEIO air transport ≈ 0.6–1.1 kgCO2e/$ depending on
-model year — verify and inflation-adjust): 250,000 × 0.8 kgCO2e/$ ≈ 200
-tCO2e. Report as hybrid; flag the tail for TMC-consolidation next year.
+**Q4. Our TMC covers 80% of air spend; expense data shows more booked
+directly.** Compute the TMC population distance-based; gap-fill the
+out-of-channel spend with a spend-based estimate (current USEEIO air-
+transportation factor, currency- and inflation-adjusted). Report the
+category as a hybrid, disclose the method split and the gap-fill share, and
+flag the tail for TMC consolidation next year.
 
-**Q5. 5,000 hotel nights: 3,000 US, 1,500 UK, 500 India (DESNZ 2024;
-verify).** 3,000 × 16.1 + 1,500 × 10.4 + 500 × 75.9 (India is among the
-highest country factors) = 48,300 + 15,600 + 37,950 = 101,850 kgCO2e ≈
-**101.9 tCO2e**. Note the India nights: 10% of volume, ~37% of hotel CO2e —
-country mix matters.
+**Q5. How do we account for hotel stays?** Optional but widely included:
+room-nights × the per-room-night factor for the **country of stay** from the
+current DEFRA "Hotel stay" tab. Collect nights by country from TMC hotel
+bookings plus expense claims; count shared rooms once. Country mix matters —
+a small share of nights in high-factor-grid countries can dominate the hotel
+line, so do not apply a single home-country factor to a global program.
 
 **Q6. The CEO flies on the company-owned jet — category 6?** No. Owned (or
 operated-leased) aircraft fuel is **scope 1**. Chartered flights on

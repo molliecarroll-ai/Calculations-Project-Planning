@@ -106,14 +106,13 @@ Allocated emissions = supplier (scope 1 + scope 2 [+ material upstream scope 3])
 # else economic: reporter spend with supplier ÷ supplier total revenue
 ```
 
-**Worked example (revenue allocation):** Supplier reports scope 1 = 42,000
-t CO2e, scope 2 = 18,000 t CO2e; revenue = $500M. You purchased $12.5M of
-goods from them.
-
-```
-Allocation share = 12.5M$ ÷ 500M$              = 0.025
-Allocated       = (42,000 + 18,000) t × 0.025  = 1,500 t CO2e
-```
+**Method walk-through (revenue allocation):**
+1. Obtain the supplier's reported scope 1 and scope 2 (and, if available,
+   Category-1-relevant upstream scope 3) for the period matching your
+   purchases, plus total revenue or production volume and the GWP set used.
+2. Allocation share = your spend with the supplier ÷ supplier total revenue
+   (prefer physical units purchased ÷ units produced when available).
+3. Allocated emissions = supplier (scope 1 + scope 2) × allocation share.
 
 Note this covers only the supplier's scope 1+2 (their "gate-to-gate") — the
 supplier's own upstream (their Category 1, etc.) is missing. Either request
@@ -139,15 +138,12 @@ Emissions = allocated supplier scope 1+2
           [+ waste in supplier ops × waste EFs]
 ```
 
-**Worked example:** Contract manufacturer allocates you 800 t CO2e of its
-scope 1+2 (per units produced for you). Your bill of materials for those units:
-1,200 t of aluminum sheet and 300 t of PP plastic.
-
-```
-Aluminum: 1,200 t × 6.7 t CO2e/t   = 8,040 t CO2e   # ecoinvent, wrought alloy, European mix, cradle-to-gate — verify current version/geography
-PP:         300 t × 2.0 t CO2e/t   =   600 t CO2e   # ecoinvent/PlasticsEurope, cradle-to-gate — verify
-Hybrid total = 800 + 8,040 + 600   = 9,440 t CO2e
-```
+**Method walk-through:** take the supplier's allocated scope 1+2 (per Method 1);
+add the bill-of-materials masses for your units multiplied by current
+cradle-to-gate material factors (ecoinvent or sector-association sources,
+version and geography documented per line); add known inbound transport legs
+at current mode factors. Ask the supplier exactly what its allocation already
+includes before topping up.
 
 **Pitfalls:** double counting when the supplier's allocation already includes
 some upstream (ask exactly what's in it); gap between BOM mass and purchased
@@ -167,21 +163,17 @@ e.g., cutoff vs. APOS), DEFRA/DESNZ "material use" factors (annual UK tables),
 EPDs, sector-association averages (worldsteel, PlasticsEurope, International
 Aluminium Institute).
 
-**Worked example:** Purchases: 5,000 t hot-rolled steel, 900 t corrugated
-packaging, 40 t primary aluminum.
-
-```
-Steel:     5,000 t × 2.3 t CO2e/t  = 11,500 t CO2e  # worldsteel/ecoinvent global hot-rolled c2g, ~order 2.0–2.5 — verify vintage
-Packaging:   900 t × 0.8 t CO2e/t  =    720 t CO2e  # DEFRA 2024 material use, paper & board (primary) ≈ 0.8–0.9 t CO2e/t — verify current table
-Aluminum:     40 t × 16.5 t CO2e/t =    660 t CO2e  # primary aluminum, global mix; regional range ~4 (hydro) to >18 (coal grid) — verify
-Total                              = 12,880 t CO2e
-```
+**Method walk-through:** pull purchased masses by material from procurement
+quantity data; for each material select the current-year cradle-to-gate
+factor whose geography and production route match your supply; multiply and
+sum, documenting source, version, and dataset per line.
 
 **Pitfalls:** picking a global-average factor when your supply is regionally
-specific (aluminum varies >4×); using a *recycled-content* factor without
-evidence of recycled content; DEFRA material factors are primary-production
-based and UK-oriented — check applicability; factor boundary (some "material"
-factors exclude fabrication into the purchased form).
+specific (primary aluminum varies severalfold between hydro-based and
+coal-grid smelting); using a *recycled-content* factor without evidence of
+recycled content; DEFRA material factors are primary-production based and
+UK-oriented — check applicability; factor boundary (some "material" factors
+exclude fabrication into the purchased form).
 
 ### Method 4 — Spend-based (EEIO)
 
@@ -197,9 +189,9 @@ spend_adjusted = nominal spend ÷ inflation index (factor ref year → spend yea
 
 EF sources:
 - **USEEIO / EPA Supply Chain GHG Emission Factors for US Industries and
-  Commodities** (current release v1.3, factors in kg CO2e per 2022 USD,
-  **purchaser price**, by NAICS-aligned commodity; "with margins" factors
-  include trade/transport margins — verify current release on EPA's page).
+  Commodities** (kg CO2e per USD of a stated dollar-year, **purchaser price**,
+  by NAICS-aligned commodity; "with margins" factors include trade/transport
+  margins — verify the current release on EPA's page).
 - **EXIOBASE** (multi-regional IO, 44 countries + 5 RoW regions, ~200
   products; EUR basis; use for non-US spend or import-adjusted intensities).
 - DEFRA table 13 indirect factors are legacy (discontinued) — do not use for
@@ -207,8 +199,8 @@ EF sources:
 
 **Adjustments required:**
 1. **Inflation-adjust** spend to the factor's dollar-year using a producer
-   price or GDP deflator index (a 2025 spend against 2022-USD factors
-   overstates emissions if unadjusted).
+   price or GDP deflator index (recent-year spend against older-dollar
+   factors overstates emissions if unadjusted).
 2. **Currency-convert** at the factor year's average rate when spend is
    non-USD against USEEIO (or prefer EXIOBASE for that geography).
 3. **Deduplicate**: strip taxes (VAT/sales tax), intra-company transfers,
@@ -218,47 +210,32 @@ EF sources:
 4. **Price basis**: match purchaser-price factors to what you actually paid;
    producer-price factors need margin handling (see Unit traps).
 
-**Worked example:** $8.0M (2025 USD) spend on "Management consulting
-services". Assume cumulative inflation 2022→2025 of 9%; USEEIO v1.3 factor for
-the consulting commodity ≈ 0.10 kg CO2e/2022 USD (purchaser price, with
-margins — illustrative; verify current factor).
-
-```
-Deflated spend = 8,000,000 ÷ 1.09        = 7,339,450 (2022 USD)
-Emissions      = 7,339,450 $ × 0.10 kg/$ = 733,945 kg = 734 t CO2e
-```
+**Method walk-through:** extract spend by NAICS-mapped commodity from the AP
+cube; deflate each line to the factor's dollar-year with a PPI/deflator
+index; currency-convert if needed at the factor-year average rate; multiply
+by the current-release USEEIO purchaser-price factor for that commodity; sum
+and record the release, dollar-year, and index used.
 
 **Pitfalls:** EEIO factors are economy-average — they cannot reflect supplier
 improvements (a supplier decarbonizing shows zero change under spend-based);
 miscoded commodities (mapping "software licenses" to "computer manufacturing"
-can be 3–5× off); negative spend lines (credits/rebates) need netting, not
-factor application; discounts mean spend understates physical flow.
+can be several-fold off); negative spend lines (credits/rebates) need
+netting, not factor application; discounts mean spend understates physical
+flow.
 
-## Emission factors quick reference
+## Emission factor sources
 
-All values are representative, rounded, for orientation only — **verify
-against the current publication** (source + vintage labeled per value).
+| Source | Governing table | Coverage | Units convention | Cadence |
+|---|---|---|---|---|
+| EPA Supply Chain GHG Emission Factors (USEEIO-based) | Commodity factor file, current release | US economy, NAICS-aligned commodities (spend-based) | kg CO2e per USD of a stated dollar-year; purchaser price; with/without-margins variants | Updated with USEEIO releases — verify current |
+| EXIOBASE 3 | MRIO product intensities | 44 countries + 5 RoW regions, ~200 products | kg CO2e per EUR, basic prices | Periodic releases |
+| ecoinvent | Material/process datasets | Global; geography- and system-model-specific (cutoff vs. APOS) | kg CO2e per kg or unit, cradle-to-gate | Versioned releases — state version |
+| DEFRA/DESNZ UK GHG Conversion Factors | "Material use" tables | UK-oriented, primary-production basis | kg CO2e per tonne | Annual |
+| Sector associations (worldsteel, IAI, PlasticsEurope, GCCA) | Sector LCI/average reports | Global/regional material averages | kg CO2e per tonne of material | Multi-year updates |
+| EPDs / supplier PCFs (PACT, Catena-X) | Program-specific declarations | Product-specific, cradle-to-gate | Per declared unit | Per publication; check validity window |
 
-**Spend-based (kg CO2e per USD, purchaser price):**
-
-| Commodity (NAICS-style) | Factor | Source & vintage |
-|---|---|---|
-| Paper mills / converted paper | ~0.5–0.9 kg CO2e/2022 USD | EPA Supply Chain Factors v1.3 (2024 release) — verify |
-| Plastics products | ~0.4–0.6 kg CO2e/2022 USD | EPA SEF v1.3 — verify |
-| Computers/electronics mfg | ~0.1–0.2 kg CO2e/2022 USD | EPA SEF v1.3 — verify |
-| Professional/technical services | ~0.05–0.12 kg CO2e/2022 USD | EPA SEF v1.3 — verify |
-| Food products (varies widely) | ~0.5–1.5 kg CO2e/2022 USD | EPA SEF v1.3 — verify |
-
-**Average-data (cradle-to-gate, kg CO2e per kg material):**
-
-| Material | Factor | Source & vintage |
-|---|---|---|
-| Steel, hot-rolled (global avg) | ~2.0–2.5 | worldsteel 2023 / ecoinvent v3.10 — verify |
-| Aluminum, primary (global mix) | ~15–17 | IAI 2023 / ecoinvent v3.10; hydro-based ~4 — verify |
-| Paper & board (primary) | ~0.8–0.9 | DEFRA/DESNZ 2024 material use — verify current year |
-| Plastics, average primary | ~2–3.1 | DEFRA 2024 material use / PlasticsEurope — verify |
-| Glass (primary) | ~0.8–0.9 | DEFRA 2024 material use — verify |
-| Cement (Portland, global) | ~0.8–0.9 | GCCA/ecoinvent — verify |
+This skill intentionally quotes no factor values. When a quantitative answer
+is needed, pull the current-year value from the named source.
 
 ## Unit and conversion traps
 
@@ -319,30 +296,34 @@ against the current publication** (source + vintage labeled per value).
 - **Factor-basis consistency:** one dollar-year per EEIO run; one GWP set;
   purchaser-price basis throughout; documented factor citations per line.
 - **Intensity sanity:** implied kg CO2e/$ of total Category 1 should fall
-  within the plausible range of the underlying commodity mix (~0.05 for pure
-  services to ~1+ for heavy materials).
+  within the plausible range of the underlying commodity mix — pure services
+  at the low end, heavy-materials procurement an order of magnitude or more
+  higher.
 - **Year-over-year deltas** decomposed into volume, mix, method, and factor
   effects before publication.
 
 ## Worked FAQ
 
-**Q1. We spent €4.2M on packaging in 2025. Screening number?**
-Convert and deflate: €4.2M × 1.08 USD/EUR (2022 avg — verify) = $4.54M ÷ 1.09
-(2022→2025 inflation, illustrative) = $4.16M (2022 USD). × ~0.55 kg CO2e/$
-(EPA SEF v1.3, paperboard container mfg, purchaser price — verify) ≈
-**2,290 t CO2e**. Spend-based tier; refine with tonnages if material.
+**Q1. We spent €4.2M on packaging in 2025. How do we screen it?**
+Spend-based method: convert to USD at the factor-year average rate, deflate
+to the USEEIO factor's dollar-year, map the spend to the packaging commodity
+(e.g., paperboard container manufacturing), and multiply by the
+current-release EPA Supply Chain purchaser-price factor. Screening tier only —
+refine with tonnages (average-data method) if material.
 
-**Q2. Supplier reports scope 1+2 of 90,000 t CO2e, revenue $1.2B; we buy $30M.
+**Q2. Supplier reports scope 1+2 and revenue; we know our spend with them.
 What's our allocation, and is it complete?**
-90,000 × (30/1,200) = **2,250 t CO2e**. Not complete — it omits the
-supplier's own upstream. Either obtain their Cat-1-relevant scope 3 or top up
-with the hybrid method; disclose the boundary either way.
+Allocated emissions = supplier (scope 1 + scope 2) × (your spend ÷ supplier
+revenue), preferring physical allocation when unit data exists. Not
+complete — it omits the supplier's own upstream. Either obtain their
+Cat-1-relevant scope 3 or top up with the hybrid method; disclose the
+boundary either way.
 
-**Q3. We bought 250 t of PET resin. Average-data estimate?**
-250 t × ~2.2 t CO2e/t (PET bottle-grade, cradle-to-gate, ecoinvent
-v3.10/PlasticsEurope — verify) = **550 t CO2e**. If your resin is rPET, use a
-recycled-content factor (~0.4–0.9 t CO2e/t, allocation-method dependent) with
-supplier evidence.
+**Q3. We bought 250 t of PET resin. How do we estimate it?**
+Average-data method: mass × the current cradle-to-gate PET factor
+(ecoinvent/PlasticsEurope, matching grade and geography). If your resin is
+rPET, use a recycled-content factor only with supplier evidence, and note the
+allocation method it embeds.
 
 **Q4. Our supplier paid the ocean freight and billed it in the unit price.
 Category 1 or 4?**
@@ -358,9 +339,9 @@ performance. Move that supplier to Method 1 (supplier-specific) to capture
 the reduction; disclose the method change.
 
 **Q6. Should software SaaS subscriptions be in Category 1?**
-Yes — purchased services are in the minimum boundary. Use spend-based
-(data-processing/software publishing commodity, ~0.05–0.1 kg CO2e/2022 USD,
-EPA SEF v1.3 — verify) or the vendor's customer-allocated footprint if
+Yes — purchased services are in the minimum boundary. Use spend-based with
+the data-processing/software-publishing commodity factor from the current
+EPA Supply Chain release, or the vendor's customer-allocated footprint if
 published (several hyperscalers provide these).
 
 ## References
@@ -371,7 +352,7 @@ published (several hyperscalers provide these).
 - Technical Guidance for Calculating Scope 3 Emissions v1.0 (2013) —
   Category 1 chapter (method definitions, decision tree, formulas).
 - EPA Supply Chain GHG Emission Factors for US Industries and Commodities
-  (USEEIO-based; current release v1.3, kg CO2e/2022 USD) — verify current.
+  (USEEIO-based; verify current release and dollar-year).
 - EXIOBASE 3 (MRIO database) — for non-US spend.
 - ecoinvent (current version; note system model), DEFRA/DESNZ UK Government
   GHG Conversion Factors (annual; "material use" tables), sector averages

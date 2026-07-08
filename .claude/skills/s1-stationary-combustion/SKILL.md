@@ -5,9 +5,9 @@ description: >-
   gas, boilers, furnaces, ovens, kilns, dryers, water heaters, diesel/gasoline
   emergency generators, on-site CHP, flares, fuel oil, propane/LPG, coal, or
   biomass/wood/biogas burned in fixed equipment. Also routes here: fuel
-  combustion emission factors (EPA Hub Table 1, Part 98 Table C-1, DEFRA fuel
-  tables, IPCC 2006 Vol. 2 defaults), HHV vs NCV conversion, therms/MMBtu/GJ
-  unit math, and estimating fuel use from spend or floor area.
+  combustion emission factor sources (EPA Hub Table 1, Part 98 Table C-1,
+  DEFRA fuel tables, IPCC 2006 Vol. 2 defaults), HHV vs NCV conversion,
+  therms/MMBtu/GJ unit math, and estimating fuel use from spend or floor area.
 ---
 
 # Scope 1 — Stationary Combustion
@@ -91,21 +91,26 @@ CO2 (kg) = fuel mass (kg) × carbon fraction (kg C/kg fuel) × 44/12 × oxidatio
 Oxidation factor: 1.00 by default (IPCC 2006 GL Vol. 2 ch. 1 and Part 98 both
 assume complete oxidation unless measured otherwise).
 
-**Worked example** — 1,000 metric tons of bituminous coal, measured average
-carbon content 68.0% (as received):
+**Method walk-through** — variable-quality solid fuel (e.g., coal):
 
 ```
-CO2 = 1,000,000 kg × 0.680 × (44/12)
-    = 1,000,000 × 0.680 × 3.6667
-    = 2,493,333 kg  ≈ 2,493 t CO2
+M_fuel   = fuel mass burned (kg), from weighbridge/delivery records,
+           adjusted for start/end inventory change
+CF       = carbon fraction (kg C/kg fuel), tonnage-weighted average of the
+           lab analyses, on the same moisture basis as M_fuel
+CO2 (kg) = M_fuel × CF × (44/12) × oxidation factor
+
+CH4/N2O:  Q_fuel (TJ, NCV) = M_fuel × measured heating value (basis-converted)
+          CH4, N2O (kg)    = Q_fuel × EF_gas (IPCC 2006 Vol. 2 Table 2.2,
+                             kg/TJ, NCV basis — convert first; see unit traps)
+          CO2e             = CH4 × GWP_CH4 + N2O × GWP_N2O
+                             (GWPs per the inventory's declared AR set)
 ```
 
-CH4/N2O still come from energy-basis defaults: with measured HHV
-28.5 GJ/t → 28,500 GJ = 28.5 TJ; IPCC 2006 Vol. 2 Table 2.2 (energy
-industries, NCV basis — convert first, see unit traps): CH4 1 kg/TJ, N2O
-1.5 kg/TJ → ~28.5 kg CH4 and ~42.8 kg N2O ≈ 0.80 + 11.3 = 12.1 t CO2e
-(AR5: CH4 28, N2O 265) — ~0.5% of the CO2. Round-trip check: 2,493 t CO2 /
-1,000 t coal = 2.49 t/t, inside the plausible 2.2–2.7 range for bituminous.
+CH4+N2O typically contribute well under 1% of CO2e for coal; a much larger
+share signals a unit slip. Round-trip check: CO2 per tonne of fuel should land
+in a plausible range for the fuel rank (roughly 2.2–2.7 t CO2/t for bituminous
+coal).
 
 **Pitfalls:** carbon content basis (as-received vs dry vs dry-ash-free) must
 match the mass basis of the fuel quantity; moisture mismatches shift results
@@ -134,60 +139,31 @@ or meters.
 
 **Two factor bases — pick per your activity data:**
 
-*Energy basis* (gas billed in therms, MMBtu, kWh, GJ):
+**Method walk-through** (energy basis — gas billed in therms, MMBtu, kWh, GJ;
+US/EPA style):
 
 ```
-E_gas (kg) = energy (MMBtu, HHV) × EF_gas (kg or g / MMBtu)
-CO2e (kg)  = CO2 + CH4 (kg) × GWP_CH4 + N2O (kg) × GWP_N2O
+Q_fuel (MMBtu, HHV) = billed therms × 0.1   (or billed MMBtu/Dth directly)
+CO2 (kg)  = Q_fuel × EF_CO2          — EPA Hub Table 1, kg CO2/MMBtu (HHV),
+                                       current year
+CH4 (kg)  = Q_fuel × EF_CH4 ÷ 1,000  — EPA Hub Table 1 / Part 98 Table C-2,
+                                       g CH4/MMBtu
+N2O (kg)  = Q_fuel × EF_N2O ÷ 1,000  — same source, g N2O/MMBtu
+CO2e (kg) = CO2 + CH4 × GWP_CH4 + N2O × GWP_N2O
+            — GWPs per the inventory's declared AR set (`ghg-protocol` §4)
 ```
 
-**Worked example** — US office, 12,000 therms of natural gas for the year
-(EPA Hub 2025 / Part 98 Table C-1 & C-2; AR5 GWPs: CH4 28, N2O 265):
+*Volume/mass basis* (fuel bought in gallons, liters, tonnes): identical
+structure with V_fuel × EF_CO2 (kg CO2/gal from EPA Hub Table 1), plus CH4/N2O
+computed on the fuel's energy content (V_fuel × default heat content →
+MMBtu × the per-MMBtu gas factors).
 
-```
-Energy   = 12,000 therms × 0.1 MMBtu/therm            = 1,200 MMBtu (HHV)
-CO2      = 1,200 MMBtu × 53.06 kg CO2/MMBtu           = 63,672 kg
-CH4      = 1,200 MMBtu × 1.0 g/MMBtu = 1,200 g        → 1.20 kg × 28  =  33.6 kg CO2e
-N2O      = 1,200 MMBtu × 0.10 g/MMBtu = 120 g         → 0.12 kg × 265 =  31.8 kg CO2e
-Total    = 63,672 + 33.6 + 31.8 = 63,737 kg ≈ 63.7 t CO2e
-```
-
-*Volume/mass basis* (fuel bought in gallons, liters, tonnes):
-
-```
-E_CO2 (kg) = volume (gal) × EF (kg CO2/gal)
-```
-
-**Worked example** — 3,500 US gallons of diesel (distillate No. 2) in backup
-generators (EPA Hub 2025):
-
-```
-CO2      = 3,500 gal × 10.21 kg CO2/gal               = 35,735 kg
-Energy   = 3,500 gal × 0.138 MMBtu/gal                = 483 MMBtu (HHV)
-CH4      = 483 × 3.0 g/MMBtu  = 1,449 g → 1.449 kg × 28  =  40.6 kg CO2e
-N2O      = 483 × 0.60 g/MMBtu =   290 g → 0.290 kg × 265 =  76.8 kg CO2e
-Total    = 35,735 + 40.6 + 76.8 ≈ 35,852 kg ≈ 35.9 t CO2e
-```
-
-**Worked example, UK/DEFRA style** — 250,000 kWh of natural gas (UK bills in
-kWh, gross CV). DEFRA 2024 natural gas ≈ 0.1829 kg CO2e/kWh (gross CV,
-CO2+CH4+N2O bundled; verify current-year table):
-
-```
-250,000 kWh × 0.1829 kg CO2e/kWh = 45,725 kg ≈ 45.7 t CO2e
-```
-
-**Worked example, IPCC default** — 100,000 m³ of natural gas, non-US/UK site,
-measured NCV 37.0 MJ/m³ (IPCC 2006 Vol. 2 Table 2.4, NCV basis: CO2
-56,100 kg/TJ; CH4 5 kg/TJ, N2O 0.1 kg/TJ for commercial/institutional):
-
-```
-Energy = 100,000 m³ × 37.0 MJ/m³ = 3,700,000 MJ = 3.70 TJ (NCV)
-CO2    = 3.70 × 56,100 = 207,570 kg
-CH4    = 3.70 × 5   = 18.5 kg × 28  = 518 kg CO2e
-N2O    = 3.70 × 0.1 = 0.37 kg × 265 =  98 kg CO2e
-Total  ≈ 208.2 t CO2e
-```
+*Regional variants:* DEFRA/DESNZ factors arrive as **kg CO2e** per kWh (gross
+or net CV), per liter, or per tonne with CH4/N2O pre-bundled at current
+UK-official GWPs — apply directly to the billed quantity and do **not** add
+separate CH4/N2O (use DEFRA's per-gas breakout columns when per-gas reporting
+is required). IPCC 2006 defaults are kg per TJ on an **NCV** basis — convert
+the activity data's basis first (see unit traps).
 
 **Pitfalls:**
 - Applying an HHV-basis factor (EPA) to NCV-quantified energy or vice versa —
@@ -207,24 +183,22 @@ screening). High uncertainty — flag as estimated (`ghg-protocol` §8).
 **(a) Spend ÷ unit price → quantity, then Method 3:**
 
 ```
-Quantity = spend ($) ÷ average unit price ($/unit, same region & period)
+Quantity = spend ($) ÷ average unit price ($/unit, same region & period —
+           e.g., EIA state-level commercial gas price for the year)
+→ then Method 3 on the derived quantity
 ```
 
-Example: $8,000 annual gas spend, average commercial rate $1.10/therm (EIA
-state-level commercial price for the year) → 7,273 therms → 727.3 MMBtu ×
-53.06 = **38.6 t CO2** (+ CH4/N2O as above). Never apply a combustion EF to
-dollars directly; convert to physical units first (a spend-based EEIO factor
-is a different, life-cycle boundary — see `ghg-protocol` §3 tier 5).
+Never apply a combustion EF to dollars directly; convert to physical units
+first (a spend-based EEIO factor is a different, life-cycle boundary — see
+`ghg-protocol` §3 tier 5).
 
 **(b) Floor-area energy intensity:** US commercial → EIA **CBECS 2018**
 (Table E7 and related give natural gas intensity by building type; offices are
 on the order of 30–40 kBtu/ft²·yr of gas — pull the actual figure for the
 building type and census region). Manufacturing → EIA MECS. UK → CIBSE/DEC
-benchmarks.
-
-Example: 20,000 ft² office, no gas data; CBECS office gas intensity taken as
-33 kBtu/ft²·yr → 660 MMBtu × 53.06 = **35.0 t CO2** (label: estimated,
-CBECS 2018 intensity).
+benchmarks. Derive MMBtu = floor area × intensity, then feed Method 3; label
+the result as estimated and cite the benchmark used (e.g., "CBECS 2018 office
+gas intensity").
 
 **(c) Missing-month extrapolation:** use same-month prior year (for
 weather-driven heating loads) or daily-average of adjacent months for
@@ -235,37 +209,18 @@ which months are filled.
 don't apply US CBECS to non-US buildings. Prior-year rollover must be flagged
 and replaced when actuals arrive.
 
-## Emission factors quick reference
+## Emission factor sources
 
-All values below: verify against the **current-year** publication before use —
-EPA updates the Hub roughly annually (Part 98 CO2 factors are stable; CH4/N2O
-and heat contents occasionally revise), DEFRA/DESNZ republishes every June.
+| Source | Governing table(s) | Coverage | Basis / units convention | Update cadence |
+|---|---|---|---|---|
+| EPA GHG Emission Factors Hub | Table 1 (Stationary Combustion), republishing 40 CFR Part 98 Tables C-1 (heat contents, CO2) and C-2 (CH4/N2O) | US fuels: natural gas, fuel oils, propane/LPG, coal, wood/biomass, landfill gas/biogas; CO2 per MMBtu and per gal/scf/ton; CH4/N2O per MMBtu; default heat contents | **HHV** basis; per-gas factors — you add CH4/N2O and choose the GWP set | Annual (Part 98 CO2 factors are stable; CH4/N2O and heat contents occasionally revise) |
+| 40 CFR Part 98 Subpart C | Tables C-1, C-2 | Regulatory source behind the Hub; also defines the Tier 1–4 methods | HHV; per-gas | Amended by rulemaking (infrequent) |
+| UK DESNZ/DEFRA GHG Conversion Factors | "Fuels" tab | UK fuels: kg CO2e per kWh (gross and net CV), per liter, per tonne, with CO2/CH4/N2O breakout columns | **CO2e pre-bundled** at current UK-official GWPs — do not add CH4/N2O on top | Annual (June) |
+| IPCC 2006 GL Vol. 2 (Energy) | Table 1.4 (default NCVs); Tables 2.2–2.5 (EFs by sector) | Default factors for the rest of the world, all fuels, kg per TJ | **NCV** basis; per-gas | Static (2006); check the 2019 Refinement |
+| GHG Protocol stationary combustion tool | Worksheet + guidance | Bundles the IPCC defaults with a built-in calculator | Per the bundled IPCC defaults | Check the current tool version at ghgprotocol.org |
 
-| Fuel | Factor | Units | Source & vintage |
-|---|---|---|---|
-| Natural gas | 53.06 | kg CO2/MMBtu (HHV) | EPA Hub 2025 / Part 98 Table C-1 |
-| Natural gas | 1.0 / 0.10 | g CH4 / g N2O per MMBtu | EPA Hub 2025 / Part 98 Table C-2 |
-| Natural gas heat content | 1.026 | MMBtu per 1,000 scf (HHV) | EPA Hub 2025 |
-| Natural gas (UK) | ≈0.1829 | kg CO2e/kWh (gross CV) | DEFRA/DESNZ 2024 |
-| Natural gas (IPCC) | 56,100 | kg CO2/TJ (NCV) | IPCC 2006 Vol. 2 Table 2.2 |
-| Distillate fuel oil No. 2 (diesel) | 10.21 / 73.96 | kg CO2/gal · kg CO2/MMBtu (HHV) | EPA Hub 2025 |
-| Residual fuel oil No. 6 | 11.27 / 75.10 | kg CO2/gal · kg CO2/MMBtu | EPA Hub 2025 |
-| Kerosene | 10.15 | kg CO2/gal | EPA Hub 2025 |
-| Propane | 5.72 / 62.87 | kg CO2/gal · kg CO2/MMBtu | EPA Hub 2025 |
-| LPG (UK) | ≈1.56 | kg CO2e/liter | DEFRA/DESNZ 2024 |
-| Gas oil (UK) | ≈2.76 | kg CO2e/liter | DEFRA/DESNZ 2024 |
-| Petroleum products, generic | 3.0 / 0.60 | g CH4 / g N2O per MMBtu | EPA Hub 2025 / Table C-2 |
-| Bituminous coal | 93.28 | kg CO2/MMBtu (HHV) | EPA Hub 2025 |
-| Sub-bituminous coal | 97.17 | kg CO2/MMBtu (HHV) | EPA Hub 2025 |
-| Coal (any) | 11 / 1.6 | g CH4 / g N2O per MMBtu | EPA Hub 2025 / Table C-2 |
-| Wood & wood residuals | 93.80 (biogenic) | kg CO2/MMBtu (HHV) | EPA Hub 2025 |
-| Wood | 7.2 / 3.6 | g CH4 / g N2O per MMBtu (in scope 1) | EPA Hub 2025 |
-| Landfill gas / biogas | 52.07 (biogenic); 3.2 / 0.63 | kg CO2/MMBtu; g CH4 / g N2O per MMBtu | EPA Hub 2025 |
-| Diesel/gas oil (IPCC) | 74,100 | kg CO2/TJ (NCV) | IPCC 2006 Vol. 2 Table 2.2 |
-
-DEFRA fuel factors are **kg CO2e** (CO2+CH4+N2O pre-bundled, current-year
-UK-official GWPs) — do not add separate CH4/N2O on top; EPA/IPCC factors are
-per-gas — you must add CH4/N2O and choose the GWP set yourself.
+This skill intentionally quotes no factor values. When a quantitative answer
+is needed, pull the current-year value from the named source.
 
 ## Unit and conversion traps
 
@@ -273,13 +228,14 @@ per-gas — you must add CH4/N2O and choose the GWP set yourself.
   **HHV/gross**; IPCC and IEA are **NCV/net**. NCV ≈ GCV × 0.90 for natural
   gas (~10% gap, latent heat of water vapor) and ≈ GCV × 0.95 for coal and oil
   (~5%) — IPCC 2006 Vol. 2 ch. 1 convention. Applying a kg/TJ-NCV factor to
-  HHV energy overstates gas CO2 ~10%. Per-MMBtu factor pairs differ too:
-  53.06 kg/MMBtu-HHV ≈ 56.1 t/TJ-NCV for gas — same physics, different basis.
+  HHV energy overstates gas CO2 ~10%. The same fuel's per-MMBtu-HHV and
+  per-TJ-NCV factors are different numbers describing the same physics —
+  never mix bases.
 - **Therms and decatherms.** 1 therm = 0.1 MMBtu = 105.5 MJ; 1 Dth (dekatherm)
   = 10 therms = 1 MMBtu. 1 MMBtu = 1.05506 GJ. 1 kWh = 3,412 Btu = 3.6 MJ.
-- **ccf/Mcf vs energy.** 1 Mcf (1,000 scf) gas ≈ 1.026 MMBtu HHV (EPA default;
-  use the utility's CV when stated). "MCF" (thousand) vs "MMCF" (million):
-  a 1,000× blunder that QA must catch.
+- **ccf/Mcf vs energy.** 1 Mcf (1,000 scf) gas ≈ 1.026 MMBtu HHV (EPA default
+  heat content; use the utility's CV when stated). "MCF" (thousand) vs "MMCF"
+  (million): a 1,000× blunder that QA must catch.
 - **US vs imperial gallons.** 1 US gal = 3.78541 L; 1 imperial gal = 4.54609 L
   = 1.2009 US gal. UK fuel records in liters, US factors per US gallon.
 - **LPG mass vs volume.** Propane ≈ 0.493 kg/L (≈1.87 kg per US gal) at
@@ -329,13 +285,14 @@ data, same-month prior year for heating fuels, like-facility intensity
 - **Biogenic line check:** wood/biogas CO2 must appear in the biogenic memo
   line, not scope 1; scope 1 should still contain their CH4/N2O.
 
-## Worked FAQ
+## FAQ
 
-**Q1. Our US HQ used 48,500 therms of natural gas. Scope 1 emissions?**
-48,500 therms = 4,850 MMBtu. CO2 = 4,850 × 53.06 = 257,341 kg. CH4 = 4,850 ×
-1.0 g = 4.85 kg × 28 = 135.8 kg CO2e. N2O = 4,850 × 0.10 g = 0.485 kg × 265 =
-128.5 kg CO2e. **Total ≈ 257.6 t CO2e** (EPA Hub 2025 factors, AR5 GWPs;
-verify current-year Hub).
+**Q1. Our US HQ used 48,500 therms of natural gas. How do we compute scope 1?**
+Method 3, energy basis: convert therms → MMBtu (× 0.1), apply the current-year
+EPA Hub Table 1 natural gas CO2 factor (kg CO2/MMBtu, HHV), add CH4 and N2O
+from the same table's g/MMBtu factors, and convert those with the inventory's
+declared GWP set. Expect CH4+N2O to add well under 1% of the CO2e. Cite the
+Hub publication year and GWP set in the disclosure.
 
 **Q2. A landlord-operated leased office where we pay pro-rated gas — scope 1?**
 Depends on your consolidation approach and who has operational control of the
@@ -346,33 +303,34 @@ If you operate the heating system under your lease, it is scope 1. State the
 treatment in your inventory design; see `ghg-protocol` §2 and `s3-c08`.
 
 **Q3. Backup generator burned 600 gal of B20 biodiesel blend. How to book it?**
-Split by volume: fossil diesel 480 gal × 10.21 kg CO2/gal = 4,901 kg scope 1
-CO2; biodiesel 120 gal × 9.45 kg CO2/gal (EPA Hub 2025, biodiesel 100%) =
-1,134 kg **biogenic CO2, outside the scopes**. CH4/N2O on total energy:
-600 gal × 0.138 MMBtu/gal ≈ 82.8 MMBtu (diesel HHV as proxy) × (3.0 g CH4 +
-0.60 g N2O)/MMBtu → 0.248 kg CH4 (7.0 kg CO2e) + 0.0497 kg N2O (13.2 kg CO2e).
-**Scope 1 ≈ 4.92 t CO2e; biogenic ≈ 1.13 t CO2.**
+Split by volume: the 80% fossil-diesel share × the Hub Table 1 diesel CO2
+factor → scope 1 CO2; the 20% biodiesel share × the Hub biodiesel (B100) CO2
+factor → **biogenic CO2, outside the scopes**. CH4/N2O are computed on the
+**whole** 600 gal via its energy content (gallons × heat content → MMBtu ×
+the per-MMBtu CH4/N2O factors) and stay in scope 1. The classic errors:
+burning the whole volume at the fossil factor, or dropping CH4/N2O on the bio
+share.
 
-**Q4. UK site burned 30,000 liters of gas oil in a boiler. Emissions?**
-DEFRA/DESNZ 2024 gas oil ≈ 2.76 kg CO2e/L (bundled CO2+CH4+N2O; verify
-current table): 30,000 × 2.76 = 82,800 kg ≈ **82.8 t CO2e**. Do not add
-separate CH4/N2O — the DEFRA CO2e factor already includes them. If you need
-per-gas reporting, use DEFRA's CO2/CH4/N2O column breakout instead.
+**Q4. UK site burned 30,000 liters of gas oil in a boiler. Which factor?**
+The current-year DEFRA/DESNZ "Fuels" tab, gas oil row, kg CO2e per liter —
+applied directly to the liters. Do not add separate CH4/N2O — the DEFRA CO2e
+factor already includes them. If you need per-gas reporting, use DEFRA's
+CO2/CH4/N2O column breakout instead of the bundled CO2e column.
 
-**Q5. We co-fire 5,000 t wood chips (HHV 9.0 MMBtu/t as received) with coal.
-Where does the wood go?**
-Energy = 45,000 MMBtu. Biogenic CO2 = 45,000 × 93.80 kg/MMBtu = 4,221 t →
-**outside-of-scopes biogenic line**. Scope 1 keeps CH4 = 45,000 × 7.2 g =
-324 kg × 28 = 9.07 t CO2e and N2O = 45,000 × 3.6 g = 162 kg × 265 = 42.9 t
-CO2e → **≈52.0 t CO2e in scope 1** from the wood, plus the coal computed
-normally. (EPA Hub 2025; AR5.)
+**Q5. We co-fire wood chips with coal. Where does the wood go?**
+Compute the wood's energy (tonnage × HHV as received), apply the Hub Table 1
+wood/biomass CO2 factor, and report that CO2 on the **outside-of-scopes
+biogenic line**. The wood's CH4 and N2O (per-MMBtu factors × the declared
+GWPs) **stay in scope 1**, alongside the coal computed normally. Two QA
+failures to watch for: no biogenic line despite biomass fuel, or wood CO2
+sitting inside scope 1.
 
 **Q6. Only 9 months of gas invoices exist for a site (Jan–Sep, 21,000 therms).
 Annualize how?**
 Gas heating is seasonal — do not simple-average. Use same-months prior year to
 estimate the Oct–Dec share (e.g., if Oct–Dec was 38% of the prior year's
 total, estimate full year = 21,000 ÷ 0.62 ≈ 33,900 therms), or HDD-weight the
-missing months. Flag the 12,900-therm estimate as gap-filled and replace when
+missing months. Flag the estimated portion as gap-filled and replace when
 invoices arrive (`ghg-protocol` §8).
 
 ## References

@@ -137,38 +137,42 @@ C11 = Σ_models [ units sold × lifetime operating hours (h)
 Sum by model × market (grid factors and driving patterns differ), then
 aggregate.
 
-**Worked example — automotive (the canonical case).** An OEM sells
-250,000 gasoline vehicles in market A. Assumptions: sales-weighted real-world
-fuel consumption 7.4 L/100 km (regulatory test value 6.5 L/100 km uplifted
-~14% for real-world gap — disclose the uplift and source, e.g., ICCT
-real-world gap studies); lifetime activity 200,000 km (market-A assumption;
-typical published OEM assumptions run ~150,000–240,000 km depending on
-market — label yours); gasoline EF 2.32 kgCO2/L combustion (EPA GHG Emission
-Factors Hub, 2025 edition: 8.78 kgCO2/gal ≈ 2.32 kg/L; add CH4/N2O per
-vehicle-km, small — verify current), CO2e ≈ 2.34 kgCO2e/L with CH4/N2O.
+**Method walk-through — fuel-consuming product (vehicles, the canonical
+case).** Symbolic, per model × market:
 
 ```text
-Lifetime fuel per vehicle = 200,000 km × 7.4 L/100 km / 100 = 14,800 L
-Per-vehicle lifetime emissions = 14,800 L × 2.34 kgCO2e/L = 34,632 kgCO2e ≈ 34.6 tCO2e
-Cohort total = 250,000 × 34.6 tCO2e = 8,658,000 tCO2e ≈ 8.66 MtCO2e
+1. N  = units sold, by model and market   ← sales/ERP shipment data,
+        reconciled to revenue
+2. D  = lifetime activity (km), per market ← disclosed assumption (national
+        transport/scrappage statistics, fleet data, OEM disclosures;
+        published OEM assumptions run roughly 150,000–240,000 km by market —
+        label yours)
+3. FC = real-world fuel consumption (L/100 km) ← regulatory test-cycle value
+        (WLTP / EPA label) plus a disclosed real-world uplift (ICCT gap
+        studies)
+4. EF = combustion factor (kgCO2e/L, incl. CH4/N2O) ← the market's fuel EF
+        source, current edition (EPA GHG EF Hub, DESNZ)
+5. Per-unit lifetime emissions = D × FC / 100 × EF
+6. C11 = Σ_(model, market) N × per-unit / 1,000   → tCO2e
 ```
 
-For BEVs in the same cohort: units × lifetime km × kWh/100 km (real-world,
-incl. charging losses ~10–15%) × grid EF of the sales market — see the grid
+**Method walk-through — electricity-using product (appliances,
+electronics).** Same skeleton with an energy term:
+
+```text
+Per-unit lifetime energy = annual energy use (kWh/yr; sales-weighted label
+                           values: ENERGY STAR / DOE / EU energy label)
+                           × expected lifetime (yr; service/warranty data,
+                           disclosed)
+Per-unit emissions       = lifetime kWh × grid EF of the sales market
+                           (eGRID subregion / IEA / national source,
+                           current year)
+C11                      = Σ_models units sold × per-unit / 1,000
+```
+
+For BEVs and heat pumps, measure lifetime energy at the wall (charging
+losses included) and apply the sales market's grid factor — see the grid
 trajectory note below.
-
-**Worked example — appliance.** A manufacturer sells 500,000 refrigerators
-in the US. Annual energy 350 kWh/yr (sales-weighted ENERGY STAR/DOE label
-values — disclose), lifetime 12 years (manufacturer service data; DOE/industry
-typicals 12–15 yr), US average grid factor 0.37 kgCO2e/kWh (eGRID 2023 data,
-released 2025, US national average — verify current; better: sales-weighted
-subregional factors).
-
-```text
-Per-unit lifetime energy = 350 kWh/yr × 12 yr = 4,200 kWh
-Per-unit emissions = 4,200 kWh × 0.37 kgCO2e/kWh = 1,554 kgCO2e ≈ 1.55 tCO2e
-Cohort total = 500,000 × 1.55 tCO2e = 777,000 tCO2e
-```
 
 **Pitfalls:** test-cycle vs. real-world consumption (NEDC/WLTP/EPA label
 values understate real driving by ~5–40% depending on cycle — disclose which
@@ -193,16 +197,11 @@ combusted unless you can document non-combustion uses (e.g., naphtha sold as
 chemical feedstock → category 10 processing treatment; disclose the split
 and the fate of embodied carbon).
 
-**Worked example.** A fuel retailer sells 1.2 billion L of diesel and
-0.9 billion L of gasoline in the reporting year. EFs: diesel 2.70 kgCO2/L
-(EPA Hub 2025: 10.21 kgCO2/gal — verify), gasoline 2.32 kgCO2/L; add CH4/N2O
-(≈ +0.5–1%; here use 2.72 and 2.34 kgCO2e/L, AR5 GWPs).
-
-```text
-Diesel:   1.2e9 L × 2.72 kgCO2e/L = 3.264e9 kg = 3,264,000 tCO2e
-Gasoline: 0.9e9 L × 2.34 kgCO2e/L = 2.106e9 kg = 2,106,000 tCO2e
-C11 = 5,370,000 tCO2e ≈ 5.37 MtCO2e
-```
+**Input provenance.** Quantity sold per fuel is metered from sales/billing
+ledgers; the combustion-only EF (CO2 plus CH4/N2O, in the inventory's
+declared GWP set) comes from the market's factor source — EPA GHG EF Hub,
+DESNZ, or IPCC defaults, current edition — matched to the quantity's basis
+(volume, mass, or energy; HHV vs. NCV).
 
 **Pitfalls:** biofuel blend shares — the biogenic CO2 fraction (e.g., 10%
 ethanol in E10) is reported outside the scopes, not in the category 11 total
@@ -227,14 +226,11 @@ release fraction (1 − recovery efficiency), capped at 100%. IPCC 2006 GL
 vol. 3 ch. 7 and EPA Vintaging Model provide default leak and recovery
 rates by equipment type.
 
-**Worked example.** 40,000 residential AC units sold, each charged with
-1.2 kg R-410A (GWP ≈ 2,088 AR4 / ≈ 1,924 AR5 — state your set; use AR5
-here). Annual leak 4%/yr × 15 yr = 60% in-use; EOL release 35% of remaining
-charge: total release = 60% + 35% × 40% = 74%.
-
-```text
-C11 = 40,000 × 1.2 kg × 0.74 × 1,924 kgCO2e/kg / 1,000 = 68,340 tCO2e
-```
+**Input provenance.** Charge per unit from bills of materials and type
+approvals; annual leak rate, lifetime, and EOL recovery efficiency from
+IPCC 2006 GL vol. 3 ch. 7 defaults or the EPA Vintaging Model
+(equipment-type-specific); GWP from the inventory's declared IPCC AR set,
+blend-weighted for refrigerant blends.
 
 Note: a heat pump also consumes electricity — add the energy-using-product
 formula for the same units and sum both mechanisms.
@@ -247,8 +243,8 @@ items (`ghg-protocol` skill §4).
 ### 4. Generic/average product assumptions
 
 **When:** no model-level data — use typical-product profiles: regulatory
-minimum-efficiency assumptions, sector-average energy use (e.g., "average
-laptop ≈ 30–60 kWh/yr"), or competitor label data for comparable products.
+minimum-efficiency assumptions, sector-average energy-use profiles, or
+competitor label data for comparable products.
 Same formulas as method 1 with average inputs; score data quality lower and
 prioritize replacing assumptions for the highest-volume SKUs.
 
@@ -259,16 +255,12 @@ C11_indirect = units sold × uses per lifetime × energy per use (kWh or L)
                × EF, summed over scenario segments (e.g., wash temperature mix)
 ```
 
-**Worked example — apparel.** 2,000,000 shirts sold; profile: 40 washes per
-shirt lifetime, 0.7 kWh/wash (machine + share of dryer, 60% line-dry
-scenario), grid 0.30 kgCO2e/kWh (market-weighted):
-
-```text
-2,000,000 × 40 × 0.7 kWh × 0.30 kgCO2e/kWh / 1,000 = 16,800 tCO2e
-```
-
-Disclose the use-profile source (e.g., detergent-industry habits surveys)
-and that inclusion is optional — keep the choice stable YoY.
+**Input provenance.** Units sold from sales systems; the use profile (uses
+per lifetime, energy per use, scenario mix such as wash-temperature or
+line-dry shares) from published consumer-habits surveys (e.g.,
+detergent-industry studies); grid EF market-weighted from the usual grid
+sources. Disclose the profile source and that inclusion is optional — keep
+the choice stable YoY.
 
 ### Grid-decarbonization trajectory (optional refinement)
 

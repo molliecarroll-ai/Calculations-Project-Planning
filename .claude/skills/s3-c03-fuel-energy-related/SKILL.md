@@ -100,13 +100,11 @@ The **DEFRA/DESNZ UK Government GHG Conversion Factors "WTT — fuels" tables**
 every common fuel, maintained yearly. US alternative: derive WTT from
 Argonne **GREET** life-cycle model minus EPA combustion factors.
 
-**Worked example:** Fleet purchases 500,000 L diesel (average biofuel blend).
-
-```
-WTT: 500,000 L × 0.61 kg CO2e/L = 305,000 kg = 305 t CO2e
-# DEFRA 2024 WTT table, diesel (average biofuel blend) ≈ 0.61 kg CO2e/L — verify current year
-# (scope 1 combustion, separately: 500,000 L × ~2.51 kg CO2e/L ≈ 1,255 t CO2e)
-```
+**Method walk-through:** take each fuel quantity straight from the scope 1
+fuel register (same liters/kWh/tonnes — no new metering) and multiply by the
+current-year WTT factor for that fuel; the combustion emissions of the same
+quantity stay in scope 1 under the combustion-only factor. Two lines, two
+scopes, one activity dataset.
 
 WTT is typically **20–30% of combustion** for conventional fossil fuels —
 a useful sanity ratio.
@@ -128,7 +126,7 @@ grid mix, per delivered kWh. DEFRA publishes "WTT — UK electricity"
 (generation component) annually; for other grids use IEA life-cycle
 extensions or national sources; absent anything better, approximate as
 grid combustion EF × an upstream uplift for the generation mix (documented
-assumption, ~10–25% for fossil-heavy grids).
+assumption, roughly 10–25% for fossil-heavy grids — state it explicitly).
 
 ### Activity (c) — T&D losses
 
@@ -141,36 +139,32 @@ Emissions = electricity consumed (kWh) × grid combustion EF (kg CO2e/kWh)
 #   published "T&D loss EF" (DEFRA): already per kWh consumed — multiply directly
 ```
 
-Loss rates: **eGRID Grid Gross Loss (GGL)** for the US, ~4.5–5% (eGRID 2022:
-national GGL ≈ 4.8% — verify current eGRID release); **IEA** country loss
-rates elsewhere (world average ~8%; EU mostly 4–7%; some grids, e.g. India,
-15%+ — verify IEA World Energy Balances current edition). DEFRA publishes a
-combined UK "T&D — UK electricity" factor (~0.018 kg CO2e/kWh consumed,
-2024 — verify) plus a small "WTT of T&D" factor for the upstream slice of the
-lost electricity.
+Loss rates (grid statistics, not emission factors — approximate magnitudes,
+verify current editions): **eGRID Grid Gross Loss (GGL)**, ~5% US national
+(use the subregion value from the current eGRID release); **IEA** country
+loss rates elsewhere (world average ~8%; EU mostly ~4–7%; some grids, e.g.,
+India, above 15% — IEA World Energy Balances, current edition). DEFRA
+publishes a combined UK "T&D — UK electricity" factor per kWh consumed
+(multiply directly, no loss algebra) plus a small "WTT of T&D" factor for the
+upstream slice of the lost electricity.
 
-**Worked example — one facility, all three activities (a)+(b)+(c):**
-US facility, reporting year: 1,200,000 kWh grid electricity; 3,500 MMBtu
-natural gas; 20,000 L diesel for backup generators.
+**Method walk-through — one facility, activities (a)+(b)+(c):**
+Inputs come straight from the scope 1/2 workpapers: fuel quantities by type,
+metered kWh, and each meter's grid region.
 
 ```
-(a) Fuel WTT
-  Gas:    3,500 MMBtu × 293.07 kWh/MMBtu = 1,025,745 kWh(HHV)
-          × 0.034 kg CO2e/kWh WTT            =  34,875 kg  # DEFRA 2024 WTT nat gas (gross CV) ≈ 0.034 — verify; US-specific: GREET
-  Diesel: 20,000 L × 0.61 kg CO2e/L WTT      =  12,200 kg  # DEFRA 2024 WTT — verify
+(a) each fuel quantity × current-year WTT factor for that fuel
+    (DEFRA WTT tables; GREET-derived for US-specific pathways).
+    Watch HHV/NCV basis on energy-denominated fuels.
+(b) kWh × current fuel-cycle (WTT-of-generation) factor for that grid
+    (DEFRA "WTT — UK electricity" or national/IEA equivalent).
+(c) kWh × grid generation EF (subregion, not national average)
+        × L/(1−L) with the current eGRID GGL or IEA loss rate
+    — or kWh × a published per-kWh-consumed loss factor directly
+      (DEFRA style); never both.
 
-(b) Electricity upstream (fuel-cycle)
-  1,200,000 kWh × 0.055 kg CO2e/kWh          =  66,000 kg  # illustrative fuel-cycle factor ≈ 15% of a 0.37 kg/kWh grid; use published value — verify
-
-(c) T&D losses
-  1,200,000 kWh × 0.373 kg CO2e/kWh × 0.048/(1−0.048)
-                                             =  22,566 kg  # eGRID 2022 US-avg output EF ≈ 0.373 kg CO2e/kWh and GGL ≈ 4.8% — use subregion values; verify
-
-Category 3 total ≈ 34,875 + 12,200 + 66,000 + 22,566 = 135,641 kg ≈ 136 t CO2e
+Category 3 = (a) + (b) + (c), each line labeled with factor source and vintage.
 ```
-
-Use the facility's **eGRID subregion** factor and GGL, not the national
-average, in real work.
 
 ### Activity (d) — Generation of purchased electricity sold to end users
 
@@ -181,35 +175,26 @@ Emissions = electricity purchased for resale (kWh) × generation EF of the
             purchased power (supplier-specific if known, else grid average)
 ```
 
-**Worked example:** A retail electricity provider buys 2.0 TWh on the
-wholesale market and resells it. Grid-average generation EF 0.35 kg CO2e/kWh
-(illustrative — use the relevant market factor, verify).
+The end customers of that resold power report the same generation emissions
+as *their* scope 2 — that is expected and is not double counting within any
+one inventory.
 
-```
-2,000,000,000 kWh × 0.35 kg CO2e/kWh = 700,000 t CO2e (Category 3d)
-```
+## Emission factor sources
 
-The end customers of that power report the same generation emissions as
-*their* scope 2 — that is expected and is not double counting within any one
-inventory.
+| Source | Governing table | Coverage | Units convention | Cadence |
+|---|---|---|---|---|
+| DEFRA/DESNZ UK GHG Conversion Factors | "WTT — fuels"; "WTT — UK electricity"; "T&D — UK electricity" (+ "WTT of T&D") | All common fuels; UK grid upstream and losses | kg CO2e per liter/kWh/tonne; energy basis is gross CV; T&D factor is per kWh consumed | Annual |
+| EPA eGRID | Subregion output emission rates; Grid Gross Loss | US grid, by subregion | kg CO2e (lb) per kWh generated; GGL as % relative to delivered sales | Periodic releases — verify current |
+| IEA World Energy Balances / Emission Factors | Country T&D loss rates; grid factors | Global, by country | % losses; kg CO2e per kWh | Annual |
+| Argonne GREET | Fuel-cycle pathway results | US fuel supply chains | Per MJ/gallon; derive WTT = lifecycle − combustion | Annual |
+| Supplier-specific data | Certified-gas / refinery intensity statements; utility loss rates | Contract-specific | As stated by supplier — verify boundary | Per supplier |
 
-## Emission factors quick reference
+Grid-loss magnitude notes retained above (eGRID GGL ~5% US; IEA world ~8%,
+EU ~4–7%, some grids >15%) are grid statistics, not emission factors — verify
+current releases before use.
 
-Representative values — verify against the current publication year.
-
-| Item | Factor | Source & vintage |
-|---|---|---|
-| Diesel WTT (avg biofuel blend) | ~0.61 kg CO2e/L | DEFRA/DESNZ 2024 WTT fuels — verify current year |
-| Petrol WTT (avg biofuel blend) | ~0.59 kg CO2e/L | DEFRA 2024 WTT fuels — verify |
-| Natural gas WTT | ~0.034 kg CO2e/kWh (gross CV) | DEFRA 2024 WTT fuels — verify; US supply chains differ (methane leakage) — consider GREET |
-| Jet kerosene WTT | ~0.52 kg CO2e/L | DEFRA 2024 WTT fuels — verify |
-| LPG WTT | ~0.19 kg CO2e/L | DEFRA 2024 WTT fuels — verify |
-| UK electricity, generation (scope 2 ref) | ~0.207 kg CO2e/kWh | DEFRA 2024 — verify |
-| UK electricity, WTT of generation (Cat 3b) | ~0.053 kg CO2e/kWh | DEFRA 2024 "WTT — UK electricity" — verify |
-| UK electricity, T&D losses (Cat 3c) | ~0.018 kg CO2e/kWh consumed | DEFRA 2024 "T&D — UK electricity" — verify |
-| US grid output EF (national) | ~0.37 kg CO2e/kWh | EPA eGRID 2022 (2024 release) — use subregion; verify |
-| US grid gross loss (GGL) | ~4.8% | eGRID 2022 — verify current |
-| Country T&D loss rates | EU ~4–7%; world avg ~8%; India ~15%+ | IEA World Energy Balances (current ed.) — verify |
+This skill intentionally quotes no factor values. When a quantitative answer
+is needed, pull the current-year value from the named source.
 
 ## Unit and conversion traps
 
@@ -253,9 +238,9 @@ Representative values — verify against the current publication year.
 ## QA checks
 
 - **Ratio tests:** Cat 3(a) ≈ 20–30% of scope 1 stationary+mobile fossil
-  emissions; Cat 3(c) ≈ scope 2 (location-based) × loss rate (≈5% US);
-  Cat 3(b) ≈ 10–25% of scope 2 for fossil-heavy grids. Large deviations mean
-  a factor-basis error.
+  emissions; Cat 3(c) ≈ scope 2 (location-based) × the grid's loss rate
+  (~5% US per eGRID GGL); Cat 3(b) ≈ 10–25% of scope 2 for fossil-heavy
+  grids. Large deviations mean a factor-basis error.
 - **Completeness:** every scope 1 fuel line and every scope 2 meter has a
   Category 3 counterpart (a reconciliation join, not a judgment call).
 - **Double-count scan:** no WTW factors in scope 1/2; no consumption-basis
@@ -268,14 +253,17 @@ Representative values — verify against the current publication year.
 
 ## Worked FAQ
 
-**Q1. Scope 1 diesel is 1,255 t CO2e from 500,000 L. What's Category 3(a)?**
-500,000 L × 0.61 kg CO2e/L (DEFRA 2024 WTT, diesel avg blend — verify) =
-**305 t CO2e**. Sanity: 305/1,255 ≈ 24%, inside the expected 20–30% band.
+**Q1. Our scope 1 diesel line is done. What's Category 3(a) for the same fuel?**
+The same liters from the scope 1 register × the current-year DEFRA WTT
+factor for diesel (average biofuel blend). Sanity check: the result should
+land around 20–30% of the scope 1 combustion emissions for that fuel.
 
-**Q2. Scope 2 (location-based) is 4,100 t CO2e from 11.0 GWh in eGRID
-subregion with EF 0.373 kg CO2e/kWh. T&D losses?**
-11,000,000 kWh × 0.373 × 0.048/(1−0.048) = **207 t CO2e** (eGRID 2022 GGL
-≈ 4.8% — verify subregion value). Roughly 5% of scope 2, as expected.
+**Q2. We have scope 2 (location-based) from metered kWh. How do we get T&D
+losses?**
+kWh × the subregion generation EF from the current eGRID release ×
+L/(1−L) using that subregion's GGL. Expect roughly the loss-rate share of
+scope 2 (~5% in the US); a materially different ratio signals a
+factor-basis error.
 
 **Q3. We buy 100% renewable power via RECs. Is Category 3 zero?**
 Not automatically. On the location basis, 3(b)/(c) follow the physical grid.
@@ -284,10 +272,10 @@ but nonzero fuel-cycle emissions and losses still occur physically); the
 common practice is location-based Category 3 with disclosure. State your
 basis; don't silently zero it.
 
-**Q4. Our German site used 2.4 GWh. Cat 3(c) with IEA data?**
-2,400,000 kWh × ~0.35 kg CO2e/kWh (German grid, ~2023, illustrative — verify
-UBA/IEA current) × ~0.055/(1−0.055) (IEA German loss rate ~5–6% — verify) ≈
-**49 t CO2e**.
+**Q4. How do we compute Cat 3(c) for a German site?**
+Site kWh × the current German grid generation EF (UBA or IEA) × L/(1−L)
+with the IEA German loss rate from the current World Energy Balances edition.
+Label both sources and vintages in the workpaper.
 
 **Q5. Can I just apply DEFRA's WTW freight factor to my own trucks and skip
 Category 3?**
@@ -295,8 +283,8 @@ No. Your own trucks' combustion is scope 1 (combustion factor) and their fuel
 WTT is Category 3(a) (WTT factor) — two lines, two scopes. WTW factors are
 for third-party transport in Categories 4/6/9.
 
-**Q6. We're a gas utility: we buy and resell 50 million therms to customers.
-Where does that go?**
+**Q6. We're a gas utility: we buy and resell gas to customers. Where does
+that go?**
 Combustion by your customers is their scope 1 (and Category 11 for you as
 sold-product use if you report it there per the Standard's fuel-sale
 treatment); the *upstream* emissions of gas you resell are your Category 3(d)
