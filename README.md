@@ -50,12 +50,22 @@ Score each candidate item 1–5 on six criteria. Weighted total drives rank orde
 
 ## 3. Capacity & Working Model (two calc support leads)
 
-With two people who sometimes pair and sometimes work solo, the plan assumes:
+**Actual capacity (confirmed Jul 2026):** Evan is 100% dedicated to this work, but ~20% of that is reactive support → **~0.8 FTE of plannable roadmap capacity**. Erin is ~15% dedicated → **~6 hours/week**. Combined ≈ 0.95 FTE, heavily concentrated in one person. The model below is built around that asymmetry:
 
-- **One DRI per item, the other as reviewer.** Every item has exactly one directly responsible support lead; the second person reviews methodology and test results. This keeps both informed without doubling cost on every item.
-- **Pair (work together) when:** methodology is novel or contested (Category 11, gap-filling requirements), a dated customer commitment is at risk, or a requirements session needs both a methodology and a data/platform perspective.
-- **Solo (work individually) when:** the item is mature (testing, validation, documentation, CS enablement) or is a well-understood extension of prior work (e.g., refrigerants extending biogenic).
-- **WIP limits:** per person, at most **1 active build-support item + 1 item in requirements/definition**. Team-wide, at most 2 items in active build support and 1 in requirements at any time. New items queue rather than preempt, unless a gate-passing item outranks an active one by a wide margin.
+**Skills map (confirmed Jul 2026):**
+
+| Person | Expertise | Standing role on every item |
+|--------|-----------|------------------------------|
+| Evan | Calculations engineering, testing, QA | Build DRI: owns dev collaboration, testing, and QA sign-off |
+| Erin | Customer needs, platform use, methodologies | Voice of customer + methodology reviewer: validates that the item solves the real customer problem and works in actual platform workflows |
+| Mollie | Methodologies, technical requirements | Requirements owner + PM: drafts/owns PRDs, runs prioritization, sequences the roadmap |
+
+- **Evan is the primary DRI for major builds.** WIP limit: **1 active build-support item + 1 item in requirements/definition** at a time — never more. His schedule is planned at 80%, never 100%; the reactive load is real and permanent.
+- **Erin's 15% is aimed at what only she covers:** customer-needs validation and platform-use review. Concretely: she scores the *breadth of demand* and *CS time saved* criteria at intake, sanity-checks methodology choices against how customers actually use the platform, and does the pre-ship usability pass. Testing/QA stays with Evan (his strength) — Erin should not spend her 6 hrs/week there, and she should not DRI a full build.
+- **Mollie closes the requirements gate.** Since PRDs are the standing bottleneck (refrigerants, Cat 11, gap filling), requirements drafting is Mollie's lane, with Erin contributing methodology/customer input in bounded sessions and Evan reviewing for build feasibility.
+- **Pairing is a scarce resource.** A pairing day consumes most of Erin's weekly allocation, so pair only in **scheduled, bounded sessions**: requirements workshops (gap filling, Cat 11), methodology sign-offs, and go/no-go reviews before ship. Day-to-day build support is solo (Evan) by default.
+- **Continuity risk:** Evan is a single point of failure for the whole practice area. Mitigations: Erin reviews everything (so context is never single-homed), and every item must leave behind a written PRD + methodology note + test evidence — no tribal-knowledge ships.
+- **Team-wide concurrency:** effectively **one major build at a time** on the support side, with a second item allowed only if its support burden is light (eng-heavy items where CS involvement is review/testing only).
 - **Pipeline stages:** Intake → Scoping/Requirements → Build support → Test/validate → Ship & enable (docs, KB, CS training) → Post-ship check (did it actually reduce CS workaround time?).
 
 ---
@@ -69,11 +79,14 @@ With two people who sometimes pair and sometimes work solo, the plan assumes:
 - **Constraint:** August outages — plan no new code starts in August; use the time for requirements, testing, and validation.
 
 ### Phase 2 — The committed builds (September–November 2026)
-- **In-platform gap filling** (code start ~Sep) — protected top priority through EOY because of the Liberty Mutual commitment. One support lead is DRI end-to-end.
-- **DEFRA telework** (Sep, ~1 mo) — second lead as DRI; sequenced after simplified electricity ships.
-- **Simplified combustion** (Sep–Nov) — reconcile the 2 vs. 3 month estimate before committing the window.
-- **Refrigerants / non-Kyoto** (Oct–Nov) — starts only if the requirements gate passed in Phase 1.
-- Mid-phase checkpoint (early Oct): if gap filling is slipping against the Liberty Mutual date, pair both leads on it and let combustion/refrigerants slide — the dated commitment wins.
+
+With ~0.8 FTE of plannable support capacity (Evan) + Erin's review hours, the four fall items must be **stack-ranked, not run in parallel**: **gap filling > DEFRA telework > simplified combustion > refrigerants.**
+
+- **In-platform gap filling** (code start ~Sep) — Evan's active build through EOY (dev collaboration, testing, QA); protected top priority because of the Liberty Mutual commitment. Erin validates the methodology and the workflow against Liberty Mutual's actual use case; Mollie owns the updated PRD out of the Jul 7 session.
+- **DEFRA telework** (~1 mo) — Evan runs it as his active build in the window between simplified-electricity ship and gap-filling code start (early Sep); if that window closes, it queues behind gap filling rather than running alongside it.
+- **Simplified combustion** (Sep–Nov per Gantt) — proceeds in its window **only if engineering can carry it with light support involvement** (Erin methodology/platform review; Evan spot-check QA only). If it needs real support bandwidth, it slides. Reconcile the 2 vs. 3 month estimate first.
+- **Refrigerants / non-Kyoto** (Oct–Nov) — starts only if the requirements gate passed in Phase 1 *and* combustion isn't already consuming the light-support slot; otherwise moves to Dec/Q1.
+- Mid-phase checkpoint (early Oct): if gap filling is slipping against the Liberty Mutual date, everything else pauses and both leads converge on it — the dated commitment wins.
 
 ### Phase 3 — Category 11 and the next cycle (December 2026 →)
 - **Category 11 build decision by November:** with methodology validated across Daimler/AGCO/Tenneco data, write the PRD in October, score it against the criteria in §2, and target a December/Q1 build start if it ranks (three-account demand suggests it will).
@@ -91,8 +104,8 @@ With two people who sometimes pair and sometimes work solo, the plan assumes:
 
 ## 5. Open Questions (for internal discussion)
 
-1. **Capacity reality:** What fraction of Evan's and Erin's time is protected for roadmap work vs. reactive customer support? The WIP limits in §3 assume roughly 50%+ availability; if it's lower, Phase 2 needs to shed an item.
-2. **Skills split:** How should DRI assignments map to each lead's strengths (methodology vs. data/pipeline vs. testing)? This determines who owns gap filling vs. DEFRA/combustion in Phase 2.
+1. ~~**Capacity reality**~~ — **Answered (Jul 2026):** Evan 100% dedicated with ~20% reactive (≈0.8 FTE plannable); Erin ~15% (≈6 hrs/wk). §3 and Phase 2 updated accordingly.
+2. ~~**Skills split**~~ — **Answered (Jul 2026):** Evan = calc engineering/testing/QA; Erin = customer needs/platform use/methodologies; Mollie = methodologies/technical requirements. Skills map added to §3. Residual risk: no one besides Evan covers engineering/QA — written test evidence per item is the mitigation.
 3. **Other dated commitments:** Liberty Mutual EOY is the only hard date captured. Are there other contractual or promised dates (Daimler? renewals tied to Cat 11?) that should raise an item's commitment score?
 4. **Workaround cost data:** Do we have (or can we start tracking) CS hours spent per calc-area workaround? That evidence makes the 20% "CS time saved" criterion objective instead of anecdotal, and it's the best story for justifying eng investment.
 5. **Engineering capacity:** Who commits eng bandwidth on the product side (Vinh's team?), and how many concurrent builds can they actually support? The plan assumes ~2 concurrent.
