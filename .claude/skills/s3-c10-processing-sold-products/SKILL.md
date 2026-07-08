@@ -105,14 +105,18 @@ fuel EFs from EPA Hub / DEFRA / IPCC and grid factors per location (see the
 `ghg-protocol` skill §7). State whether their scope 2 is location- or
 market-based; location-based is the safer default for consistency.
 
-**Worked example.** You sell 12,000 t of aluminum sheet to a customer whose
-stamping plant reports 38,000 t CO2e scope 1 + 2 (verified, location-based)
-and processes 95,000 t of total metal input per year.
+**Method walk-through.**
 
-```text
-allocation_share = 12,000 t ÷ 95,000 t = 0.1263
-C10 = 38,000 tCO2e × 0.1263 = 4,800 tCO2e
-```
+1. Rank customers by tonnage; request facility-level scope 1 + 2 (or fuel
+   and kWh) for the plants processing your product.
+2. Establish the allocation share: tonnes of your intermediate processed at
+   the facility ÷ total tonnes of all inputs processed there (physical
+   basis; fall back to revenue share only if mass is unavailable).
+3. C10 for that customer = facility (S1 + S2) × allocation share; if only
+   energy was provided, compute S1/S2 first with current-year fuel and grid
+   factors for the plant's location.
+4. Sum across customers; record the allocation basis and the customer's
+   reporting year alongside each figure.
 
 **Pitfalls:** (a) customers report company-wide, not facility, emissions —
 company-wide totals need a second allocation step (facility share of
@@ -144,18 +148,20 @@ worldsteel downstream fabrication data); academic/LCI literature. Match
 geography (grid mix of the processing country dominates electricity-driven
 processes).
 
-**Worked example.** A polymer producer sells 50,000 t of PP resin;
-end-use statistics say 55% injection molding, 30% film extrusion, 15%
-unknown (treated as injection molding, disclosed). Representative conversion
-factors (illustrative values on the order of published European conversion
-LCIs — verify against current ecoinvent/PlasticsEurope datasets before use):
-injection molding ≈ 0.55 tCO2e/t processed; film extrusion ≈ 0.35 tCO2e/t.
+**Method walk-through** (a polymer producer selling resin):
 
-```text
-Injection (incl. unknown): 50,000 t × 0.70 × 0.55 tCO2e/t = 19,250 tCO2e
-Film extrusion:            50,000 t × 0.30 × 0.35 tCO2e/t =  5,250 tCO2e
-C10 total = 24,500 tCO2e
-```
+1. Take tonnes sold as intermediates from the sales ledger, split by
+   product family and channel.
+2. Split volume across processing pathways using trade-association end-use
+   statistics (e.g., injection molding vs. film extrusion shares); assign
+   the unknown share to a disclosed convention (highest-intensity plausible
+   pathway, or the sales-weighted average).
+3. Pull a conversion-step-only intensity per pathway from a current LCA
+   dataset (ecoinvent, PlasticsEurope eco-profiles), matched to the
+   processing geography's grid.
+4. C10 = Σ_pathways tonnes × pathway share × pathway intensity [tCO2e/t
+   processed]; disclose the end-use-split source and year and the dataset
+   versions.
 
 **Pitfalls:** (a) using a cradle-to-gate factor for the *final* product
 minus your product's factor — subtraction of mismatched LCA boundaries is
@@ -164,24 +170,24 @@ processing tier when several occur before the final product — disclose the
 truncation; (c) double counting mass when a product is sold partly to
 processors and partly as final goods — split the sales ledger first.
 
-## Emission factors / parameters quick reference
+## Emission factor sources
 
-Representative downstream-processing intensities (all **verify against the
-named current source before use**; values shift with grid decarbonization):
-
-| Processing step | Typical intensity | Units | Source + vintage |
-|---|---|---|---|
-| Plastics injection molding (EU grid) | ~0.4–0.7 | tCO2e / t polymer processed | ecoinvent v3.x "injection moulding" (check current version year) |
-| Plastics film extrusion (EU) | ~0.25–0.45 | tCO2e / t | ecoinvent v3.x "extrusion, plastic film" |
-| Blow molding | ~0.5–0.9 | tCO2e / t | ecoinvent v3.x |
-| Steel cold rolling / stamping | ~0.2–0.4 | tCO2e / t steel | worldsteel LCI (2023 data release; verify) |
-| Aluminum sheet forming | ~0.3–0.5 | tCO2e / t | International Aluminium Institute LCI (verify vintage) |
-| Textile cut-and-sew (garment assembly) | ~0.3–0.8 | tCO2e / t fabric | LCA literature; highly grid-dependent |
-| Semiconductor packaging/assembly | site-specific; no reliable generic | — | request customer data |
+| Source | Governing dataset/table | Coverage | Units convention | Cadence |
+|---|---|---|---|---|
+| ecoinvent | Conversion-process datasets ("injection moulding", "extrusion, plastic film", blow molding, etc.) | Plastics and general manufacturing conversion steps | tCO2e (or kg) per t processed — confirm conversion-step-only boundary | Versioned releases; record version and reference year |
+| Sphera MLC/GaBi | Process datasets | Broad industrial processing steps | per t processed; check system boundary | Versioned releases |
+| PlasticsEurope Eco-profiles | Conversion-process eco-profiles | European plastics conversion | per t polymer processed | Periodic updates |
+| worldsteel LCI | Downstream fabrication data | Steel cold rolling, stamping, fabrication | per t steel | Periodic data releases |
+| International Aluminium Institute LCI | Downstream forming data | Aluminum sheet/extrusion forming | per t aluminum | Periodic |
+| LCA literature | Sector studies | Textiles cut-and-sew and other niches; highly grid-dependent | per t material | Ad hoc — check grid vintage |
+| Customer data | Facility S1/S2 or energy per tonne | Semiconductor packaging/assembly and other steps with no reliable generic factor | site-specific | Request annually |
 
 Electricity-dominant processes: scale the factor to the processing country's
 grid (see `s2-purchased-electricity` and the `ghg-protocol` skill §7 for grid
 factor sources — eGRID, IEA, national factors).
+
+This skill intentionally quotes no factor values. When a quantitative answer
+is needed, pull the current-year value from the named source.
 
 ## Unit and conversion traps
 
@@ -213,27 +219,26 @@ factor sources — eGRID, IEA, national factors).
 **Q1. We sell steel coil to service centers who slit it and sell to
 fabricators. How many tiers must we include?**
 The minimum boundary runs to the final product, but the Guidance accepts
-representative estimation. Model slitting (trivial, ~0.02–0.05 tCO2e/t) plus
-one representative fabrication step (~0.2–0.4 tCO2e/t, worldsteel LCI —
-verify current). For 200,000 t sold: `200,000 t × (0.03 + 0.30) tCO2e/t =
-66,000 tCO2e`. Disclose the two-tier truncation and pathway assumptions.
+representative estimation. Model slitting (a very low-intensity step) plus
+one representative fabrication step, both with per-tonne intensities from
+the current worldsteel LCI, applied to sold tonnage. Disclose the two-tier
+truncation and the pathway assumptions.
 
-**Q2. Our customer gave us their whole-company footprint (120,000 tCO2e
-S1+S2), not facility data. Can we use it?**
-Yes, with two allocations. If the plant processing your input represents 25%
-of their production tonnage, and your input is 15% of that plant's input
-mass: `120,000 × 0.25 × 0.15 = 4,500 tCO2e`. Score it lower on the data
-quality rubric (`ghg-protocol` skill §8) than facility-level data and note
-both allocation steps.
+**Q2. Our customer gave us their whole-company footprint, not facility
+data. Can we use it?**
+Yes, with two allocations: company total × (the processing plant's share of
+their production tonnage) × (your input's share of that plant's input mass).
+Score it lower on the data quality rubric (`ghg-protocol` skill §8) than
+facility-level data and note both allocation steps in the audit trail.
 
-**Q3. We sell 30,000 t of glass containers to beverage fillers. Is filling
+**Q3. We sell glass containers to beverage fillers. Is filling
 "processing"?**
 Yes — filling, capping, and labeling are processing of an intermediate
 product (an empty container is not usable by the end consumer). Filling is
-low-intensity (order 0.02–0.06 tCO2e/t of container throughput, dominated by
-line electricity — derive from a customer's line data or beverage-sector
-LCIs; verify). `30,000 t × 0.04 tCO2e/t = 1,200 tCO2e`. Often immaterial —
-a screening estimate plus disclosure may suffice.
+low-intensity, dominated by line electricity — derive a per-tonne intensity
+from a customer's line data or beverage-sector LCIs and apply it to sold
+container tonnage. Often immaterial — a screening estimate plus disclosure
+may suffice.
 
 **Q4. Half our resin goes through distributors and we cannot trace it. Can
 we exclude that half?**

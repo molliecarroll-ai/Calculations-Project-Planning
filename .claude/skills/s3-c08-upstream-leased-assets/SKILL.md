@@ -127,20 +127,22 @@ CO2e = leased area [ft² or m²] × energy intensity_buildingtype [kWh/ft²/yr]
 ```
 
 **Intensity sources:** US — EIA **CBECS** (Commercial Buildings Energy
-Consumption Survey; 2018 survey published 2022 — verify current; office
-average site energy ≈ **77 kBtu/ft²/yr ≈ 22.6 kWh/ft²/yr**, roughly
-55% electricity / 45% fuels for office stock); UK — BEES/CIBSE benchmarks;
-EU national equivalents.
+Consumption Survey; publishes site energy intensity per ft² by building
+type, with electricity/fuel splits; released on a multi-year survey cycle —
+use the latest release); UK — BEES/CIBSE benchmarks; EU national
+equivalents.
 
-**Worked example.** 40,000 ft² operating-leased office, US:
+**Method walk-through.**
 
-```
-Electricity: 40,000 ft² × 12.4 kWh/ft²/yr (CBECS 2018 office electric; verify)
-           = 496,000 kWh × 0.38 kgCO2e/kWh (eGRID subregion; verify) = 188.5 tCO2e
-Natural gas: 40,000 ft² × 31 kBtu/ft²/yr = 1,240 MMBtu × 53.1 kgCO2e/MMBtu
-           (EPA Hub 2024, incl. CH4/N2O; verify) = 65.8 tCO2e
-Category 8 ≈ 254 tCO2e
-```
+1. From the lease register: building type, gross leased area, lease months
+   in the reporting year.
+2. Pull the building-type site-energy intensity and its electricity/fuel
+   split from the current CBECS release (or national benchmark).
+3. Electricity line: area × electric intensity [kWh/ft²/yr] × current-year
+   grid factor for the location (eGRID subregion; IEA/national elsewhere).
+4. Fuel line: area × fuel intensity (convert kBtu to MMBtu or kWh as the
+   factor requires) × current-year fuel factor (EPA Hub / DESNZ).
+5. Pro-rate by lease months; sum the lines into category 8.
 
 **Pitfalls:** CBECS intensities are US-stock averages — climate zone and
 building age swing them ±50%; site vs. source energy (use **site** kWh with
@@ -154,23 +156,25 @@ CO2e = FTE_unmeasured × (tCO2e/FTE from measured comparable sites)
    or  n_assets × per-asset intensity (e.g., leased forklift-hours × fuel rate)
 ```
 
-Last-resort gap-fill; flag per `ghg-protocol` §8. Typical measured office
-building-energy intensity lands ~0.3–1.0 tCO2e/FTE/yr depending on grid and
-climate — derive your own, don't borrow this range for reporting.
+Last-resort gap-fill; flag per `ghg-protocol` §8. Derive the per-FTE or
+per-asset intensity from your own measured comparable sites — do not borrow
+a generic range for reporting.
 
-## Emission factors quick reference
+## Emission factor sources
 
 Category 8 reuses stationary/mobile/electricity factors — no category-native
-factor set. Representative anchors (verify current):
+factor set.
 
-| Quantity | Value | Source/vintage |
-|---|---|---|
-| Office site energy intensity (US avg) | ~77 kBtu/ft²/yr (~22.6 kWh/ft²/yr) | EIA CBECS 2018 |
-| Warehouse site energy intensity (US avg) | ~25–30 kBtu/ft²/yr | EIA CBECS 2018 |
-| Natural gas | 53.1 kgCO2e/MMBtu (HHV) | EPA Hub 2024, AR5 |
-| US grid (national avg, location-based) | ~0.37 kgCO2e/kWh | eGRID 2023 (use subregion) |
-| UK grid | ~0.207 kgCO2e/kWh | DESNZ 2024 |
-| Average car (leased, if c8) | ~0.17 kgCO2e/vehicle-km | DESNZ 2024 |
+| Source | Governing table | Coverage | Units convention | Cadence |
+|---|---|---|---|---|
+| EIA CBECS | Consumption & intensity tables by building type | US building site-energy intensities (office, warehouse, mercantile, etc.) with electricity/fuel splits | kBtu/ft²/yr site energy (convert: 1 kWh = 3.412 kBtu) | Multi-year survey cycle — use latest release |
+| UK CIBSE/BEES benchmarks | Building energy benchmarks | UK building-type intensities | kWh/m²/yr | Periodic |
+| EPA GHG Emission Factors Hub / DESNZ conversion factors | Fuel tables | Combustion factors for gas, oil, etc. (US HHV convention; DESNZ NCV) | per MMBtu / per unit fuel | Annual |
+| EPA eGRID / IEA / national publications | Grid factors | Location-based electricity by subregion or country | kgCO2e/kWh | Annual (lagging vintage) |
+| DESNZ "Business travel — land" / EPA Hub | Vehicle tables | Leased vehicles, where they land in c8 | per vehicle-km / vehicle-mile | Annual |
+
+This skill intentionally quotes no factor values. When a quantitative answer
+is needed, pull the current-year value from the named source.
 
 ## Unit and conversion traps
 
@@ -218,11 +222,12 @@ hold only leased assets you don't operate. Report category 8 as not
 applicable/zero with that justification.
 
 **Q2. Equity-share boundary; we hold a 5-year operating lease on a regional
-office, landlord bills energy in rent.** Category 8. No meter data →
-floor-area method: 15,000 ft² × 22.6 kWh/ft²/yr ≈ 339,000 kWh-equivalent
-site energy; split 55/45 electric/gas per CBECS: 186,450 kWh × 0.38
-kgCO2e/kWh ≈ 70.9 t; 152,550 kWh × 3.412 = 520.5 MMBtu-equiv… simpler: 465
-MMBtu gas × 53.1 = 24.7 t. **≈ 96 tCO2e** (screening; request lessor data).
+office, landlord bills energy in rent.** Category 8. With no meter data, use
+the floor-area method: leased area × the current CBECS office site-energy
+intensity, split into electricity and fuel per the CBECS office-stock
+shares, then apply the location's grid factor to the electric share and the
+fuel factor to the fuel share. Screening grade — request lessor data or a
+green-lease data clause for future years.
 
 **Q3. Our leased company-car fleet — category 8?** Under operational control
 (you fuel and direct the vehicles): **scope 1**. Under a financial-control
@@ -245,6 +250,6 @@ consistent; metered-kWh-based scope 2 gives the best decision usefulness.
 - Corporate Value Chain (Scope 3) Standard (2011), ch. 5, table 5.4 (category 8) and appendix A (accounting for leased assets: lessee/lessor, lease-type matrix).
 - Technical Guidance for Calculating Scope 3 Emissions (v1.0, 2013), category 8 chapter (asset-specific, lessor-specific, average-data methods).
 - GHG Protocol FAQ on leased assets / Corporate Standard ch. 4 (boundary interaction).
-- EIA CBECS (2018, published 2022) — building energy intensities; UK CIBSE/BEES benchmarks.
+- EIA CBECS (latest release; multi-year survey cycle) — building energy intensities; UK CIBSE/BEES benchmarks.
 - EPA GHG Emission Factors Hub; eGRID; DESNZ conversion factors — the underlying fuel/grid EFs.
 - `ghg-protocol` skill — organizational boundaries (§2), EF hierarchy (§7), base-year rules (§6).

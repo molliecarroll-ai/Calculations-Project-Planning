@@ -79,24 +79,25 @@ C13 = Σ_assets [ Σ_fuels (fuel qty × fuel EF) + electricity (kWh) × grid EF 
 location (eGRID subregion, national factors) — location-based default;
 market-based optionally in parallel (see `s2-purchased-electricity`).
 
-**Worked example — office landlord.** One triple-net office building,
-tenant-procured energy per bills: 3,200,000 kWh electricity + 4,100 MMBtu
-natural gas. Location eGRID subregion factor 0.32 kgCO2e/kWh (eGRID 2023
-data — verify); gas 53.06 kgCO2/MMBtu + CH4/N2O ≈ 53.4 kgCO2e/MMBtu (EPA Hub
-2025 — verify).
+**Method walk-through — tenant-space energy (office landlord).** Symbolic,
+per asset:
 
 ```text
-Electricity: 3,200,000 kWh × 0.32 kgCO2e/kWh = 1,024,000 kg = 1,024 tCO2e
-Gas:         4,100 MMBtu × 53.4 kgCO2e/MMBtu =  218,940 kg =   219 tCO2e
-Building C13 = 1,243 tCO2e
+1. Tenant-procured electricity (kWh) and fuel (MMBtu, therms)
+      ← tenant utility bills / submeters (green-lease clauses, ENERGY STAR
+        Portfolio Manager tenant sharing), or whole-building data minus the
+        landlord-metered share
+2. Grid EF by asset location   ← eGRID subregion (US) / national factor,
+        current year
+3. Fuel EF                     ← EPA Hub / DESNZ, current edition (HHV-match)
+4. Building C13 = Σ_fuels (qty × EF) + kWh × grid EF
+5. Portfolio C13 = Σ_buildings − anything already in lessor scope 1/2
 ```
 
-**Worked example — vehicle lessor.** 18,000 cars on operating lease;
-fuel-card data covers 12,000 cars averaging 1,340 L gasoline/car·yr:
-`12,000 × 1,340 L × 2.34 kgCO2e/L = 37,620 tCO2e` for the covered fleet;
-extrapolate the 6,000 uncovered cars at the covered-fleet average
-(+18,810 t), flagged as estimated. Fleet C13 ≈ **56,430 tCO2e/yr** (annual
-lease-period basis — see traps).
+For vehicle/equipment lessors: fuel-card or telematics fuel per covered
+unit × the fuel EF; extrapolate uncovered units at the covered-fleet
+per-unit average, flagged as estimated — annual lease-period basis (see
+traps).
 
 **Pitfalls:** double counting whole-building utility data already in the
 lessor's scope 2 (net out the landlord-procured share); tenant data with
@@ -118,17 +119,12 @@ Consumption Survey, 2018 survey, EIA — verify for newer cycles) by building
 type and fuel; residential — RECS; UK/EU — CIBSE benchmarks, national EPC
 data; or Portfolio Manager peer medians.
 
-**Worked example.** REIT with 2,400,000 ft² of tenant-controlled office
-space lacking tenant data. CBECS 2018 office: electricity ≈ 15.5 kWh/ft²·yr,
-natural gas ≈ 26 kBtu/ft²·yr (verify exact current CBECS table values).
-US average grid 0.37 kgCO2e/kWh (eGRID 2023 — prefer subregional); gas
-53.4 kgCO2e/MMBtu.
-
-```text
-Electricity: 2,400,000 ft² × 15.5 kWh/ft² × 0.37 kg/kWh = 13,764,000 kg ≈ 13,764 tCO2e
-Gas:         2,400,000 ft² × 0.026 MMBtu/ft² × 53.4 kg/MMBtu = 3,332,160 kg ≈ 3,332 tCO2e
-C13 ≈ 17,100 tCO2e
-```
+**Application note.** Take the current CBECS (or CIBSE/EPC) intensity for
+the building type fuel by fuel — electricity in kWh/ft²·yr against the
+location's grid factor, gas in kBtu or MMBtu/ft²·yr against the gas EF —
+over the leased floor area, then sum. Prefer subregional grid factors, and
+reconcile the area basis (CBECS intensities are whole-building) before
+multiplying.
 
 **Pitfalls:** wrong building type (retail vs. office intensities differ
 ~2×); gross vs. net rentable vs. tenant-occupied area; applying whole-building
@@ -136,21 +132,22 @@ intensities to tenant-space-only area (CBECS intensities are whole-building —
 subtract the landlord scope 1/2 share or disclose the overlap treatment);
 national-average intensity for extreme climates.
 
-## Emission factors / parameters quick reference
+## Emission factor and parameter sources
 
-Verify all against the named current source; record source/year/units.
+Record source, edition/vintage, and units for every input per the
+`ghg-protocol` skill §7.
 
-| Parameter | Value | Units | Source + vintage |
-|---|---|---|---|
-| US office, total site energy | ~77.8 | kBtu/ft²·yr | CBECS 2018 (EIA) |
-| US office, electricity | ~15–16 | kWh/ft²·yr | CBECS 2018 |
-| US retail (non-mall), total | ~50–55 | kBtu/ft²·yr | CBECS 2018 |
-| US warehouse, total | ~25–30 | kBtu/ft²·yr | CBECS 2018 |
-| US food service, total | ~250+ | kBtu/ft²·yr | CBECS 2018 |
-| US grid average | ~0.37 | kgCO2e/kWh | eGRID 2023 data (pub. 2025); use subregion |
-| Natural gas | 53.06 | kgCO2/MMBtu (HHV) | EPA GHG EF Hub, 2025 ed. |
-| Motor gasoline | 2.32/L (8.78/gal) | kgCO2 | EPA Hub 2025 |
-| Diesel | 2.70/L (10.21/gal) | kgCO2 | EPA Hub 2025 |
+| Source | Governing table / dataset | Coverage | Units convention | Cadence |
+|---|---|---|---|---|
+| EIA CBECS | Building-type energy-intensity tables, by fuel (office, retail, warehouse, food service, lodging, etc.) | US commercial buildings | kWh/ft²·yr (electricity); kBtu/ft²·yr (total/gas); whole-building basis | Survey cycles (multi-year; verify the current cycle) |
+| EIA RECS | Residential energy-intensity tables | US residential | per household / per ft² | Survey cycles |
+| CIBSE benchmarks; national EPC registries | UK/EU building benchmarks | UK/EU buildings | kWh/m²·yr | Periodic |
+| ENERGY STAR Portfolio Manager | Peer-median intensities | US/Canada portfolios | site/source EUI | Continuous |
+| EPA eGRID | Subregion output emission rates | US grid, subregional and national | per MWh (convert to kWh) | Biennial data releases |
+| EPA GHG EF Hub / UK DESNZ conversion factors | Fuel combustion tables (natural gas, gasoline, diesel) | Fuels | per MMBtu / gallon (EPA, HHV); per litre / kWh (DESNZ) | Annual |
+
+This skill intentionally quotes no factor values. When a quantitative
+answer is needed, pull the current-year value from the named source.
 
 ## Unit and conversion traps
 
@@ -179,12 +176,15 @@ Verify all against the named current source; record source/year/units.
 
 ## Worked FAQ
 
-**Q1. We're a triple-net retail REIT, operational-control boundary,
-5.5M ft², no tenant data. First-pass C13?**
-CBECS 2018 retail: ~10 kWh/ft² electricity + ~0.020 MMBtu/ft² gas (verify).
-`5.5e6 × 10 × 0.37/1000 = 20,350 t` + `5.5e6 × 0.020 × 53.4/1000 = 5,874 t`
-≈ **26,200 tCO2e**. Then start green-lease data collection on the top-20
-assets.
+**Q1. We're a triple-net retail REIT, operational-control boundary, no
+tenant data. First-pass C13?**
+Average-data method: tenant-controlled floor area × the current CBECS
+retail intensity, fuel by fuel, × location-appropriate EFs (subregional
+grid factors where assets are geocoded; gas EF from the current EPA Hub).
+Mind the building-type match (retail vs. office intensities differ
+materially) and the whole-building area basis. Then start green-lease data
+collection on the largest assets — % of area on actual data is the
+maturity metric.
 
 **Q2. Landlord buys all building energy and re-bills tenants. Scope 2
 or C13?**

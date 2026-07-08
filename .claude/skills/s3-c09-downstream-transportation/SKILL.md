@@ -97,9 +97,9 @@ CO2e = Σ fuel [litres] × fuel EF [kgCO2e/litre]
        × allocation share (your tonnes or tonne-km ÷ total carried) / 1000
 ```
 
-Diesel ≈ 2.66–2.69 kgCO2e/litre combustion (DESNZ 2024 / EPA Hub; verify).
-**Pitfall:** allocating shared vehicles by shipment count instead of mass or
-tonne-km biases against dense products.
+Fuel EFs come from the standard fuel tables (DESNZ "Fuels" tab; EPA Hub —
+per litre/gallon, updated annually). **Pitfall:** allocating shared vehicles
+by shipment count instead of mass or tonne-km biases against dense products.
 
 ### Method 2 — Distance-based (tonne-km; the standard)
 
@@ -118,25 +118,27 @@ methodology — preferred for freight; WTW by default, label if using TTW),
 DESNZ 2024 "Freighting goods" tables (kgCO2e/tonne-km by vehicle class and
 load assumptions), EPA Hub freight factors (per ton-mile).
 
-**Worked example.** A beverage producer sells 25,000 t/yr ex-works; customers
-truck it an average 420 km to their DCs, then 60 km DC→retail; sea-export
-customers take a further 8,000 t × 9,500 km by container ship.
+**Method walk-through.**
 
-```
-Road leg 1: 25,000 t × 420 km = 10,500,000 t-km × 0.105 kgCO2e/t-km
-            (DESNZ 2024, average artic HGV, avg laden; verify) = 1,102.5 tCO2e
-Road leg 2: 25,000 t × 60 km  =  1,500,000 t-km × 0.105        =   157.5 tCO2e
-Sea:         8,000 t × 9,500 km = 76,000,000 t-km × 0.016 kgCO2e/t-km
-            (container vessel avg, DESNZ 2024/GLEC; verify)     = 1,216.0 tCO2e
-Transport subtotal ≈ 2,476 tCO2e
-```
+1. From the sales ledger, split sold tonnes by Incoterms: customer-paid
+   legs stay in this category; reporter-paid legs go to c4.
+2. Build lanes per downstream leg: tonnes (gross, including packaging) ×
+   distance. First-echelon distances come from ship-to addresses; lower
+   echelons from national-average haul lengths, disclosed as modeled.
+3. Assign a mode per lane and sum tonne-km by mode.
+4. Apply current-year mode factors — GLEC v3 defaults (WTW) or DESNZ
+   "Freighting goods" (TTW, with a separate WTT tab) by vehicle class and
+   load assumption; EPA Hub per short-ton-mile for US data — one WTW/TTW
+   basis for the whole category, labeled.
+5. CO2e = Σ_lanes tonne-km × EF_mode / 1000; record each lane's data-quality
+   tier.
 
 **Pitfalls:** using vehicle-km factors with tonne payloads (an HGV
-vehicle-km factor ≈ 0.8–1.0 kgCO2e/km is ~8–10× the per-tonne-km number at
-typical loads); empty running and load factor — DEFRA "average laden"
-factors embed UK-average utilization and empty-return assumptions, so don't
-apply a separate empty-running uplift on top; double-counting the leg the
-reporter paid for (that one is c4).
+vehicle-km factor is roughly an order of magnitude above its per-tonne-km
+counterpart at typical loads); empty running and load factor — DEFRA
+"average laden" factors embed UK-average utilization and empty-return
+assumptions, so don't apply a separate empty-running uplift on top;
+double-counting the leg the reporter paid for (that one is c4).
 
 **Multi-echelon modeling discipline.** When goods pass through several
 downstream stages, build the model as a table of (echelon, share of sold
@@ -175,37 +177,28 @@ CO2e_retail  = retail store (S1+S2) × allocation (shelf-space share, or sales s
 ```
 
 Where retailer data is unavailable, an average-data route: retail energy
-intensity (CBECS "mercantile" ≈ 50–60 kBtu/ft²/yr site energy; verify) ×
-estimated shelf-space-ft²-years attributable to your products — coarse;
-disclose. Ambient warehousing benchmark on the order of ~1–5 kgCO2e/pallet-
-week; chilled/frozen several times higher (derive from GLEC logistics-site
-guidance or 3PL data; label as estimate).
+intensity (CBECS "mercantile" building type, current release) × estimated
+shelf-space-ft²-years attributable to your products × grid/fuel EFs —
+coarse; disclose. For warehousing, derive a per-pallet-week or per-tonne-week
+intensity from GLEC logistics-site guidance or 3PL data (chilled/frozen runs
+several times ambient); label as estimate. Storage and retail are usually a
+minor add-on to transport for ambient goods — cold chain is the exception.
 
-**Worked example (storage add-on):** 25,000 t through customer DCs, average
-dwell 3 weeks, ambient intensity 0.9 kgCO2e/t-week (3PL-derived; verify):
-25,000 × 3 × 0.9 / 1000 ≈ **67.5 tCO2e** — small next to transport; typical
-unless cold chain.
+## Emission factor sources
 
-## Emission factors quick reference
+| Source | Governing table | Coverage | Units convention | Cadence |
+|---|---|---|---|---|
+| GLEC Framework v3 (ISO 14083-aligned) | Default freight factors by mode | Road, rail, sea (container/bulk), air, inland waterway, transshipment; logistics-site guidance | kgCO2e per tonne-km, WTW by default | Framework revisions; factors updated periodically |
+| UK DESNZ/DEFRA GHG Conversion Factors | "Freighting goods" + "WTT — delivery vehicles" | Road by vehicle class and laden assumption (incl. refrigerated variants), rail, sea, air (with/without RF) | kgCO2e per tonne-km, TTW with separate WTT tab | Annual |
+| US EPA GHG Emission Factors Hub | Product transport tables | US road, rail, air, waterborne freight | per short-ton-mile (1 ton-mile = 1.460 t-km); CO2/CH4/N2O separate | Annual |
+| EIA CBECS | Mercantile / warehouse building types | Retail and storage energy intensities for average-data allocation | kBtu/ft²/yr site energy | Multi-year survey cycle |
+| DESNZ / EPA Hub fuel tables | Fuels | Fuel-based method (diesel, marine fuels) | per litre / gallon | Annual |
 
-Representative values, **kgCO2e per tonne-km** — label WTW vs. TTW; DESNZ
-2024 land factors are TTW with a separate WTT tab, GLEC defaults are WTW.
-**Verify current vintage.**
+Per tonne-km, air freight sits far above road, and road far above rail and
+sea — mode mix dominates everything else in this category.
 
-| Mode | EF (kgCO2e/t-km) | Source/vintage |
-|---|---|---|
-| Road, articulated HGV >33t, avg laden | ~0.105 (TTW) | DESNZ 2024 |
-| Road, rigid HGV 7.5–17t | ~0.34 (TTW) | DESNZ 2024 |
-| Van / last-mile (avg) | ~0.5–0.6 | DESNZ 2024 |
-| Rail freight | ~0.027 (TTW) | DESNZ 2024 |
-| Container ship (avg) | ~0.016 | DESNZ 2024 / GLEC |
-| Bulk carrier | ~0.004–0.008 | GLEC v3 defaults |
-| Air freight, long-haul | ~0.55–0.60 (no RF; ~1.1 with RF) | DESNZ 2024 |
-| US road freight | ~0.16–0.21 kg/ton-mile ≈ 0.11–0.14 kg/t-km | EPA Hub 2024 |
-| Diesel | ~2.68 kgCO2e/litre (TTW) | DESNZ 2024 |
-
-Air freight is ~5–6× road and ~35× sea per t-km — mode mix dominates
-everything else in this category.
+This skill intentionally quotes no factor values. When a quantitative answer
+is needed, pull the current-year value from the named source.
 
 ## Unit and conversion traps
 
@@ -261,15 +254,19 @@ freight to retailers. Split?** Your paid leg (gate→distributor) → **category
 9**. Compute both with the same tonne-km method; never book the paid leg in
 both.
 
-**Q2. 12,000 t sold ex-works, customers truck an average 350 km.** 12,000 t ×
-350 km = 4,200,000 t-km × 0.105 kgCO2e/t-km (DESNZ 2024 avg artic, TTW;
-verify) ≈ **441 tCO2e** TTW; add WTT (~0.025 kg/t-km, DESNZ 2024) for WTW ≈
-546 tCO2e if reporting well-to-wheel — label the basis.
+**Q2. Product sold ex-works and customers truck it — what is the
+calculation?** Tonne-km distance-based: sold tonnes × average haul distance
+(from ship-to addresses or a national-average assumption, disclosed) × the
+current-year road-freight factor for the representative vehicle class and
+laden assumption (DESNZ "Freighting goods" TTW, adding the WTT tab for WTW;
+or GLEC WTW defaults). Label the WTW/TTW basis on the result.
 
-**Q3. A customer air-freights 40 t of our product 6,000 km instead of sea.**
-40 × 6,000 = 240,000 t-km × 0.58 kgCO2e/t-km (long-haul air, no RF; verify)
-≈ **139 tCO2e** — versus ~3.8 t by sea. One customer's mode choice can be
-visible at category level; worth capturing top customers' modes specifically.
+**Q3. A customer air-freights our product instead of sea — does it matter?**
+Substantially: per tonne-km, air freight is far above sea, so a single
+customer's mode switch on a long lane can be visible at category level.
+Compute the lane's tonne-km with the air factor (RF treatment disclosed and
+consistent with your category 6 convention), and capture top customers'
+actual modes specifically rather than assuming a default mode mix.
 
 **Q4. Our products sell through 2,000 retail stores we don't own or pay.**
 Minimum boundary includes retail scope 1+2 allocated to your products. Coarse
@@ -290,13 +287,13 @@ decides. The 3PL's warehousing you pay for is likewise c4 (or scope 1/2 if
 you operate the site).
 
 **Q7. Cold chain: customers distribute our frozen product — anything beyond
-the truck fuel?** Yes, two additions: refrigeration-unit fuel/energy (reefer
-factors run roughly 15–25% above ambient per t-km — DESNZ publishes
-refrigerated HGV factors; verify) and **refrigerant leakage** from reefer
-units and cold stores (scope 1 of the downstream party, in your c9
-allocation). For frozen goods, cold-store dwell can rival transport: e.g.,
-5,000 t × 6 weeks × 4 kgCO2e/t-week (frozen-store intensity, 3PL-derived;
-verify) = 120 tCO2e.
+the truck fuel?** Yes, two additions: refrigeration-unit fuel/energy — use
+the refrigerated-HGV variants in the DESNZ "Freighting goods" table (they
+run materially above ambient per t-km) rather than an ad hoc uplift — and
+**refrigerant leakage** from reefer units and cold stores (scope 1 of the
+downstream party, in your c9 allocation). For frozen goods, cold-store dwell
+(tonnes × weeks × a frozen-store intensity derived from 3PL or GLEC
+logistics-site data) can rival the transport term — model it explicitly.
 
 ## References
 

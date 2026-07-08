@@ -117,16 +117,14 @@ disbursements off-site (kg); C = sum of equipment nameplate charges (kg). The
 capacity term removes refrigerant that went into (or came out of) equipment
 rather than the atmosphere.
 
-**Worked example** — R-410A chiller fleet, one year:
-- I_begin = 50 kg, I_end = 30 kg (cylinders in store)
-- A = 200 kg purchased; D = 20 kg returned to supplier
-- One new chiller installed, nameplate 120 kg; no retirements → C_end − C_begin = +120 kg
-
-```
-E = (50 − 30) + (200 − 20) − 120 = 20 + 180 − 120 = 80 kg R-410A
-CO2e (AR6):  80 kg × 2,256 kg CO2e/kg = 180,480 kg ≈ 180.5 t CO2e
-CO2e (AR5):  80 kg × 1,924 kg CO2e/kg = 153,920 kg ≈ 153.9 t CO2e
-```
+**Sign conventions that trip people up:** a storage-inventory decrease and net
+acquisitions both add to emissions. Fleet **growth** (C_end > C_begin) makes
+the capacity term subtract — that refrigerant went into equipment, not the
+air. Fleet **shrinkage** from retirements makes the capacity term negative,
+which adds the retired charge into the balance; any of it that was actually
+recovered then nets back out through I_end (recovered into your cylinders) or
+D (sent off-site). Convert the resulting kg, per refrigerant, with the
+mass-weighted blend GWP from the inventory's declared AR set.
 
 **Pitfalls:** omitting the capacity term (overstates emissions in growth
 years, produces negative results in retirement years); counting refrigerant
@@ -154,14 +152,10 @@ f_recovered: fraction of retired-unit charge actually recovered (from
            by equipment type, often 0–85% — verify)
 ```
 
-**Worked example** — office building, 40 kg of R-134a purchased during the
-year solely to top up existing chillers; no installs or retirements:
-
-```
-E = 40 kg R-134a
-CO2e (AR6) = 40 kg × 1,530 = 61,200 kg ≈ 61.2 t CO2e
-CO2e (AR5) = 40 kg × 1,300 = 52,000 kg ≈ 52.0 t CO2e
-```
+**Walk-through** — a service-only year (no installs or retirements) reduces
+to E_kg = P_service per refrigerant; convert with the blend GWP from the
+declared AR set. The whole method turns on the purpose split of purchases —
+see pitfalls.
 
 **Pitfalls:** purchases that charged **new** equipment must be excluded from
 the top-up term (only the installation-loss fraction of those kg is emitted);
@@ -180,9 +174,9 @@ E_kg = Σ_equipment_type [ N × charge_kg × LR_operating ]
 ```
 
 Default operating leak rates — **GHG Protocol HFC tool defaults, adopted from
-IPCC 2006 GL vol. 3 ch. 7 Table 7.9 (2006 vintage). Verify against the current
-GHG Protocol tool and IPCC 2019 Refinement before use; site-specific rates
-always take precedence:**
+IPCC 2006 GL vol. 3 ch. 7 Table 7.9 (2006 vintage). These ranges define the
+screening method; verify against the current GHG Protocol tool and IPCC 2019
+Refinement before use; site-specific rates always take precedence:**
 
 | Equipment type | Typical charge | Installation loss | Operating leak rate (%/yr of charge) | Refrigerant remaining at disposal |
 |---|---|---|---|---|
@@ -197,29 +191,23 @@ always take precedence:**
 Pick a point within the range based on equipment age, climate, and maintenance
 regime; document the choice. Midpoint is a defensible default for screening.
 
-**Worked example** — supermarket with a rack system, total installed charge
-800 kg R-404A, no register of service events. Choose 22.5% (range midpoint):
-
-```
-E = 800 kg × 0.225 = 180 kg R-404A/yr
-CO2e (AR5) = 180 kg × 3,943 = 709,740 kg ≈ 709.7 t CO2e
-CO2e (AR6) = 180 kg × 4,728 = 851,040 kg ≈ 851.0 t CO2e
-```
+**Walk-through**: per refrigerant, E_kg = installed charge × the selected,
+documented leak rate; convert with the blend GWP from the declared AR set.
+For high-leak categories (e.g., supermarket racks, where the default range
+spans 10–35%/yr) the selected rate is the dominant uncertainty — disclose it.
 
 **SF6 in switchgear** (same tier structure): nameplate SF6 capacity × annual
 leak rate. Defaults: sealed-pressure MV switchgear ≈ 0.1–0.5%/yr
 (manufacturer-certified, often ≤0.1%); closed-pressure HV equipment ≈
 0.5–2.6%/yr (IPCC 2006 GL vol. 3 ch. 8 regional defaults; EPA SF6 Emission
 Reduction Partnership reports utility fleet averages ~1% or below — verify
-current data). Example: 500 kg nameplate HV gear × 0.5%/yr = 2.5 kg SF6 ×
-25,200 (AR6) = 63.0 t CO2e (AR5: 2.5 × 23,500 = 58.75 t). Utilities with
-top-up logs should use the mass-balance method instead (Tier 1 dominates for
-this source; 40 CFR Part 98 subpart DD prescribes it for large users).
+current data). Utilities with top-up logs should use the mass-balance method
+instead (Tier 1 dominates for this source; 40 CFR Part 98 subpart DD
+prescribes it for large users).
 
 **Fire suppression**: installed agent base × default annual release rate ≈ 2%
 ±1%/yr (IPCC 2006 GL vol. 3 ch. 7.4 default for fire protection — verify),
-**plus** actual kg of any recorded discharge events. Example: 300 kg HFC-227ea
-installed × 2% = 6 kg × 3,350 (AR5) = 20.1 t CO2e (AR6: 6 × 3,600 = 21.6 t).
+**plus** actual kg of any recorded discharge events.
 
 **Pitfalls:** applying leak rates to purchases instead of installed charge;
 using this tier *and* adding purchase-based emissions (double counting — pick
@@ -262,11 +250,28 @@ Blends containing non-Kyoto constituents (e.g., R-448A/R-449A contain HFOs;
 legacy blends contain HCFCs) are split: the Kyoto-gas mass goes in scope 1,
 the non-Kyoto mass to the memo item.
 
-## Emission factors / parameters quick reference
+## Emission factor sources
+
+For fugitive sources the "factors" are GWPs (fixed per IPCC assessment-report
+edition) and method-defining default parameters (leak-rate and loss ranges) —
+not annually revised emission factors:
+
+- **GWPs**: IPCC AR5 WG1 (2013) Appendix 8.A; IPCC AR6 WG1 (2021) ch. 7
+  supplementary tables. The EPA GHG Emission Factors Hub GWP table
+  (Part 98 Table A-1-aligned) republishes them. Static per AR edition — use
+  the inventory's declared set.
+- **Blend compositions**: ASHRAE Standard 34 designations (mass fractions).
+- **Default leak/loss rates**: GHG Protocol HFC tool, adopting IPCC 2006 GL
+  vol. 3 ch. 7 Table 7.9 (2006 vintage; check the 2019 Refinement).
+- **SF6 leak defaults**: IPCC 2006 GL vol. 3 ch. 8; EPA SF6 Emission
+  Reduction Partnership fleet statistics; 40 CFR Part 98 subpart DD
+  (mass-balance prescription).
+- **Fire suppression default release rate**: IPCC 2006 GL vol. 3 ch. 7.4.
 
 **100-year GWPs of common refrigerants and agents** (IPCC AR5 2013 values
-without climate-carbon feedback; IPCC AR6 2021. Verify against the current
-IPCC assessment and your disclosure program's required GWP set):
+without climate-carbon feedback; IPCC AR6 2021. Retained here because they
+are fixed by the named AR edition; verify your disclosure program's required
+GWP set):
 
 | Substance | AR5 GWP-100 | AR6 GWP-100 | Notes |
 |---|---|---|---|
@@ -289,8 +294,12 @@ IPCC assessment and your disclosure program's required GWP set):
 IPCC 2006 Table 7.9, 2006 vintage). **SF6**: 0.1–0.5%/yr sealed, 0.5–2.6%/yr
 closed-pressure (IPCC 2006 ch. 8). **Fire suppression**: ~2%/yr of installed
 base (IPCC 2006 ch. 7.4). All defaults carry wide ranges — always state the
-value chosen and verify the current publication year before relying on any
-figure in this table.
+value chosen and verify the current publication before relying on any range.
+
+This skill intentionally quotes no factor values. When a quantitative answer
+is needed, pull the current-year value from the named source. (The GWPs and
+default parameter ranges above are retained deliberately: they are fixed by
+the named publication edition and define the methods.)
 
 ## Unit and conversion traps
 
@@ -365,14 +374,16 @@ service is roughly continuous; do not annualize a single large top-up event.
 - **Memo-item completeness**: if the register shows R-22 units but the memo
   item is zero, the inventory is incomplete, not clean.
 
-## Worked FAQ
+## FAQ
 
 **Q1. We bought 300 lb of R-410A this year, all for topping up rooftop units.
 What are our emissions?**
-Simplified material balance: top-up purchases ≈ emissions. 300 lb × 0.4536 =
-136.1 kg R-410A. AR6: 136.1 × 2,256 = 307,042 kg ≈ **307.0 t CO2e** (AR5:
-136.1 × 1,924 = 261,857 kg ≈ 261.9 t). State the GWP set used; confirm none of
-the purchases charged new equipment.
+Simplified material balance (Tier 2): top-up purchases ≈ emissions. Convert
+pounds to kg first (1 lb = 0.4536 kg — US cylinders are labeled in lb), then
+multiply the kg by the R-410A mass-weighted blend GWP from the inventory's
+declared AR set (blend table above) and state the set used. Confirm none of
+the purchases charged **new** equipment — those kilograms belong in the
+installation-loss term, not the top-up term.
 
 **Q2. What's the GWP of R-407C, and how do I show my work?**
 Decompose by mass: 23% HFC-32, 25% HFC-125, 52% HFC-134a. AR5: 0.23×677 +
@@ -383,15 +394,13 @@ for the composition and the IPCC AR edition for the constituent GWPs.
 **Q3. Full mass balance: we started the year with 80 kg of R-134a in
 cylinders and ended with 55 kg; bought 150 kg; sent 25 kg off-site for
 reclamation; decommissioned a chiller with a 60 kg nameplate charge (fleet
-capacity fell by 60 kg). Emissions?**
+capacity fell by 60 kg). How does the balance work?**
 
 ```
 C_end − C_begin = −60 kg  (fleet shrank)
 E = (80 − 55) + (150 − 25) − (−60)
   = 25 + 125 + 60
-  = 210 kg R-134a
-CO2e (AR6) = 210 kg × 1,530 = 321,300 kg ≈ 321.3 t CO2e
-CO2e (AR5) = 210 kg × 1,300 = 273,000 kg ≈ 273.0 t CO2e
+  = 210 kg R-134a  → convert with the HFC-134a GWP from the declared AR set
 ```
 Note how the equation treats the retired chiller: its 60 kg charge left the
 fleet, and any of it that was actually **recovered** must already appear in
@@ -411,17 +420,18 @@ in the answer (`ghg-protocol` skill §2).
 
 **Q5. We found 12 R-22 packaged units on the register. Scope 1?**
 No. R-22 is an HCFC (Montreal Protocol, non-Kyoto). Estimate losses the same
-way (e.g., charge × 1–10%/yr comfort-AC default) and report as a **memo item
-outside the scopes**: e.g., 12 units × 5 kg × 5% = 3 kg × 1,760 (AR5) ≈ 5.3 t
-CO2e, memo. Also flag the phase-out compliance angle (no new R-22 supply in
-the US since 2020) — an operational risk note, not a scope 1 line.
+way — typical charge × a documented point in the comfort-AC default leak-rate
+range, converted with the R-22 GWP — but report the result as a **memo item
+outside the scopes**, never in scope 1 totals. Also flag the phase-out
+compliance angle (no new R-22 supply in the US since 2020) — an operational
+risk note, not a scope 1 line.
 
 **Q6. A 68 kg HFC-227ea fire-suppression system discharged accidentally in
 March. How is it reported?**
-The full discharged mass is scope 1 in the reporting year: 68 kg × 3,350
-(AR5) = 227,800 kg ≈ **227.8 t CO2e** (AR6: 68 × 3,600 = 244.8 t). Add the
-routine ~2%/yr leakage on the remaining installed base. Disclose the event if
-it materially drives YoY variance.
+The full discharged mass is scope 1 in the reporting year: discharged kg ×
+the HFC-227ea GWP from the declared AR set. Add the routine ~2%/yr default
+leakage on the remaining installed base. Disclose the event if it materially
+drives YoY variance.
 
 ## References
 

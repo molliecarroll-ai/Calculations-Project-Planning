@@ -5,8 +5,9 @@ description: >-
   vans, trucks, fleet fuel (gasoline/petrol, diesel, CNG, LNG, LPG/autogas),
   fuel cards, corporate aircraft and jet fuel, owned vessels, forklifts and
   off-road equipment, biofuel blends (E10, E85, B20), fleet EVs and hybrids,
-  distance-based vs fuel-based vehicle emission factors (EPA g/mile CH4-N2O,
-  DEFRA kg CO2e/km), and fuel economy (mpg, L/100km) conversions.
+  distance-based vs fuel-based method selection and emission factor sources
+  (EPA Hub mobile tables, DEFRA vehicle tables), and fuel economy
+  (mpg, L/100km) conversions.
 ---
 
 # Scope 1 — Mobile Combustion
@@ -82,37 +83,32 @@ mirrors Part 98 Table C-1 densities/HHVs), Tables 3–5 (CH4/N2O); DEFRA
 scopes" biogenic line); IPCC 2006 Vol. 2 ch. 3 Tables 3.2.1–3.2.2 (kg/TJ NCV)
 for defaults elsewhere.
 
-```
-CO2 (kg)   = fuel volume × EF_CO2 (kg/gal or kg/L)                 [split blends first]
-CH4 (kg)   = miles × EF_CH4 (g/mile) ÷ 1,000        (EPA, on-road)
-N2O (kg)   = miles × EF_N2O (g/mile) ÷ 1,000        (EPA, on-road)
-CO2e       = CO2 + CH4×GWP_CH4 + N2O×GWP_N2O
-```
-
-**Worked example** — US sales fleet: 40,000 US gal of E10 gasoline purchased;
-telematics shows 900,000 miles; cars are gasoline passenger cars, recent
-model years. EPA Hub 2025, AR5 GWPs (CH4 28, N2O 265):
+**Method walk-through** — US fleet on a biofuel blend (fuel volume +
+telematics distance):
 
 ```
-Fossil gasoline share = 40,000 × 0.90 = 36,000 gal
-CO2 (fossil)  = 36,000 gal × 8.78 kg CO2/gal        = 316,080 kg
-Ethanol share = 40,000 × 0.10 = 4,000 gal
-CO2 (biogenic)= 4,000 gal × 5.75 kg CO2/gal         = 23,000 kg  → outside of scopes
-CH4  = 900,000 mi × ~0.005 g/mi = 4,500 g → 4.5 kg × 28  = 126 kg CO2e
-N2O  = 900,000 mi × ~0.002 g/mi = 1,800 g → 1.8 kg × 265 = 477 kg CO2e
-Scope 1 total ≈ 316,080 + 126 + 477 = 316,683 kg ≈ 316.7 t CO2e
-Biogenic CO2  ≈ 23.0 t
+V_fossil     = V_fuel × (1 − blend share, by volume)    # E10 → × 0.90
+CO2 (kg)     = V_fossil × EF_CO2(fossil fuel)           # EPA Hub Table 2,
+                                                          kg/gal, current year
+V_bio        = V_fuel × blend share
+CO2_bio (kg) = V_bio × EF_CO2(biofuel: E100/B100 row)   # Hub Table 2
+                                                          → biogenic memo line
+CH4 (kg)     = miles × EF_CH4(vehicle type, model year) ÷ 1,000  # Hub Table 3
+N2O (kg)     = miles × EF_N2O(vehicle type, model year) ÷ 1,000  # Hub Table 3
+Scope 1 CO2e = CO2 + CH4 × GWP_CH4 + N2O × GWP_N2O
+               # GWPs per the inventory's declared AR set
 ```
 
-(The ~0.005/~0.002 g/mi are illustrative of recent-model-year gasoline
-passenger cars — look up the exact model-year row in EPA Hub Table 3; older
-vehicles run several times higher.)
+Look up the exact model-year row in Hub Table 3 — older vehicles run several
+times higher on CH4/N2O than recent model years. For a modern road fleet the
+CH4/N2O contribution is well under 1% of CO2e.
 
 **Pitfalls:** fuel card exports mix personal-use fuel and non-fleet purchases
 — filter by vehicle/card; "gasoline" at US pumps is almost always E10 — using
-8.78 on the full volume overstates fossil CO2 ~3%; bulk tank deliveries need
-inventory adjustment (see the stationary skill); don't apply DEFRA per-liter
-CO2e factors *and* EPA per-mile CH4/N2O — double counting.
+the fossil gasoline factor on the full volume overstates fossil CO2 ~3%; bulk
+tank deliveries need inventory adjustment (see the stationary skill); don't
+apply DEFRA per-liter CO2e factors *and* EPA per-mile CH4/N2O — double
+counting.
 
 ### Method 2 — Distance × fuel economy → derived fuel
 
@@ -126,19 +122,8 @@ flatter reality by ~10–20%), or class averages.
 ```
 Fuel (gal) = miles ÷ fuel economy (mi/gal)
 Fuel (L)   = km × (L/100 km) ÷ 100
-→ then Method 1 formulas
-```
-
-**Worked example** — 12 diesel delivery vans, telematics total 480,000 miles,
-observed fleet average 16.0 mpg:
-
-```
-Fuel  = 480,000 ÷ 16.0 = 30,000 gal diesel
-CO2   = 30,000 × 10.21 kg/gal                       = 306,300 kg
-CH4/N2O: light-duty diesel trucks, per-mile (EPA Hub Table 3, model-year row);
-  at ~0.001 g CH4/mi and ~0.0015 g N2O/mi (illustrative recent MY):
-  CH4 0.48 kg × 28 ≈ 13 kg; N2O 0.72 kg × 265 ≈ 191 kg CO2e
-Total ≈ 306,300 + 13 + 191 ≈ 306.5 t CO2e
+→ then Method 1: CO2 from the Hub Table 2 per-gallon factor;
+  CH4/N2O per mile from Hub Table 3 using the same distance
 ```
 
 **Pitfalls:** using rated (window-sticker/NEDC/WLTP) economy without a
@@ -153,23 +138,15 @@ also how EPA CH4/N2O is always done (see Method 1).
 **Data:** km or miles by vehicle type/size/fuel.
 
 **EF sources:** DEFRA "Passenger vehicles" and "Delivery vehicles" tabs
-(kg CO2e/km, all gases bundled — e.g., DEFRA 2024: average diesel car
-≈0.170 kg CO2e/km, average petrol car ≈0.164 kg CO2e/km, average diesel van
-(≤3.5 t) ≈0.24 kg CO2e/km, artic HGV average laden ≈0.86 kg CO2e/km — verify
-the current-year workbook; factors shift with fleet-average composition every
-year). US: EPA Hub Tables 3/5 for CH4/N2O only — EPA publishes no per-mile
-CO2 factor for scope 1; derive CO2 via fuel economy (Method 2).
+(kg CO2e/km by vehicle type, size, and fuel, all gases bundled; the
+fleet-average per-km factors shift with UK fleet composition every year —
+always use the current-year workbook). US: EPA Hub Tables 3/5 for CH4/N2O
+only — EPA publishes no per-mile CO2 factor for scope 1; derive CO2 via fuel
+economy (Method 2).
 
 ```
-CO2e (kg) = distance (km) × EF (kg CO2e/km)        [DEFRA-style, bundled]
-```
-
-**Worked example** — UK-operated fleet: 120,000 km on average diesel cars
-(company cars, fuel unknown quantity). DEFRA 2024 average diesel car
-≈0.170 kg CO2e/km:
-
-```
-120,000 km × 0.170 kg CO2e/km = 20,400 kg ≈ 20.4 t CO2e (scope 1)
+CO2e (kg) = Σ_vehicle_class [ distance (km) × EF(class, size, fuel) ]
+            # DEFRA current-year tab, kg CO2e/km, bundled gases
 ```
 
 DEFRA also lists a WTT per-km companion factor (→ scope 3 cat. 3) and a
@@ -185,20 +162,13 @@ for scope 3 cat. 6, not here).
 **When:** only financial data (GL fuel accounts, expense categories) exist.
 
 ```
-Volume = spend ÷ average pump price (same country, fuel, and period)
-→ then Method 1
+Volume = spend ÷ volume-weighted average pump price
+         (same country, fuel, and period)
+→ then Method 1 (treat US pump gasoline as E10 and split the blend)
 ```
 
 Price sources: EIA weekly retail gasoline/diesel prices (US annual averages),
 DESNZ/AA UK pump prices, national statistics elsewhere.
-
-**Worked example** — $30,000 of gasoline spend, US, annual average retail
-price $3.40/gal:
-
-```
-Volume = 30,000 ÷ 3.40 = 8,824 gal (treat as E10 → fossil 7,941 gal)
-CO2    = 7,941 × 8.78 = 69,725 kg ≈ 69.7 t (+ biogenic 882 gal × 5.75 ≈ 5.1 t)
-```
 
 **Pitfalls:** spend includes taxes, car washes, snacks on fuel cards; prices
 vary ±20% within a year — use the volume-weighted period average; convert
@@ -214,23 +184,21 @@ Distance = vehicles × average annual km (national statistic for the class)
 ```
 
 US reference: FHWA average ~11,500 mi/yr per light-duty vehicle; UK: ~7,000–
-8,000 mi/yr average car (higher for company cars, ~15–20k km). **Worked
-example** — 15 gasoline pickups, assume 15,000 mi/yr each, 17 mpg class
-average: 225,000 mi ÷ 17 = 13,235 gal × 8.78 = 116,204 kg ≈ **116.2 t CO2**
-(+ CH4/N2O per mile). Uncertainty easily ±40% — replace with real data for
-material fleets.
+8,000 mi/yr average car (higher for company cars, ~15–20k km). Derive fuel via
+class-average economy, then apply Method 1 factors. Uncertainty easily ±40% —
+replace with real data for material fleets.
 
 ### Special cases
 
 - **Biofuel blends:** split by volume share (E10 = 10% ethanol, E85 ≈ 70–85%,
-  B20 = 20% biodiesel, HVO = 100% biogenic CO2). Fossil share → scope 1 CO2;
-  bio share × the bio-fuel CO2 factor (ethanol 5.75, biodiesel 9.45 kg
-  CO2/gal, EPA Hub 2025) → biogenic memo line. CH4/N2O on the whole quantity.
-  DEFRA "average biofuel blend" factors already net out the biogenic CO2 and
-  give the biogenic amount separately.
-- **CNG/LNG:** CNG 0.05444 kg CO2/scf (EPA Hub 2025); convert GGE if the fuel
-  system reports gasoline-gallon-equivalents (1 GGE ≈ 125.7 scf, verify the
-  program's definition). LNG 4.50 kg CO2/gal (EPA Hub 2025).
+  B20 = 20% biodiesel, HVO = 100% biogenic CO2). Fossil share × the fossil
+  fuel factor → scope 1 CO2; bio share × the biofuel CO2 factor (EPA Hub
+  Table 2 carries ethanol E100 and biodiesel B100 rows) → biogenic memo line.
+  CH4/N2O on the whole quantity. DEFRA "average biofuel blend" factors
+  already net out the biogenic CO2 and give the biogenic amount separately.
+- **CNG/LNG:** CNG CO2 factors are per scf (EPA Hub Table 2); convert GGE if
+  the fuel system reports gasoline-gallon-equivalents (1 GGE ≈ 125.7 scf —
+  verify the program's definition). LNG is per liquid US gallon (Hub Table 2).
 - **EV/hybrid:** battery-EV → no scope 1; charging → scope 2 (kWh from
   charge-point network exports or reimbursements). Non-plug-in hybrids: plain
   gasoline vehicles here (use their actual fuel). PHEV: fuel here, kWh scope
@@ -239,40 +207,20 @@ material fleets.
 - **Refrigerants in mobile A/C and TRUs:** leakage → `s1-fugitive-emissions`;
   only the fuel is accounted here.
 
-## Emission factors quick reference
+## Emission factor sources
 
-Verify against the current-year publication — EPA Hub updates ~annually
-(model-year rows extend each year); DEFRA republishes every June and its
-fleet-average per-km factors move year to year.
+| Source | Governing table(s) | Coverage | Basis / units convention | Update cadence |
+|---|---|---|---|---|
+| EPA GHG Emission Factors Hub | Table 2 (Mobile Combustion CO2) | CO2 for gasoline, diesel, ethanol (biogenic), biodiesel (biogenic), LPG, CNG, LNG, jet fuel, aviation gasoline, marine residual fuel | Fuel-volume basis (kg CO2 per US gal; CNG per scf); per-gas — add CH4/N2O and pick the GWP set yourself | Annual |
+| EPA GHG Emission Factors Hub | Table 3 (on-road CH4/N2O); Table 5 (alternative-fuel vehicles) | CH4 and N2O by vehicle type and model year (after-treatment technology dependent) | Distance basis (g/mile); model-year rows extend each year | Annual |
+| EPA GHG Emission Factors Hub | Table 4 (non-road CH4/N2O) | Forklifts, construction/agricultural equipment, locomotives, marine, aircraft | Fuel basis (g/gal by fuel and equipment type) | Annual |
+| 40 CFR Part 98 | Table C-1 | Fuel heat contents/densities behind Hub Table 2 | HHV; per-gas | Amended by rulemaking |
+| UK DESNZ/DEFRA GHG Conversion Factors | "Fuels" tab | Per-liter kg CO2e for mineral and average-biofuel-blend road fuels, with separate biogenic ("outside of scopes") lines | **CO2e pre-bundled** (CO2+CH4+N2O) — do not add per-gas factors on top | Annual (June) |
+| UK DESNZ/DEFRA GHG Conversion Factors | "Passenger vehicles", "Delivery vehicles" tabs | kg CO2e/km by vehicle type, size, and fuel (UK fleet-average); WTT companions on separate tabs | Distance basis; CO2e pre-bundled; fleet-average values move year to year | Annual (June) |
+| IPCC 2006 GL Vol. 2 ch. 3 | Tables 3.2.1–3.2.2 (road); 3.3–3.6 (off-road, rail, water, air) | Default factors for the rest of the world | Energy basis (kg per TJ, **NCV**); per-gas | Static (2006); check the 2019 Refinement |
 
-| Item | Factor | Units | Source & vintage |
-|---|---|---|---|
-| Motor gasoline (CO2) | 8.78 | kg CO2/US gal | EPA Hub 2025, Table 2 |
-| Diesel (CO2) | 10.21 | kg CO2/US gal | EPA Hub 2025, Table 2 |
-| Ethanol E100 (biogenic CO2) | 5.75 | kg CO2/US gal | EPA Hub 2025, Table 2 |
-| Biodiesel B100 (biogenic CO2) | 9.45 | kg CO2/US gal | EPA Hub 2025, Table 2 |
-| LPG/propane (CO2) | 5.72 | kg CO2/US gal | EPA Hub 2025, Table 2 |
-| CNG (CO2) | 0.05444 | kg CO2/scf | EPA Hub 2025, Table 2 |
-| LNG (CO2) | 4.50 | kg CO2/US gal | EPA Hub 2025, Table 2 |
-| Jet fuel / Jet A (CO2) | 9.75 | kg CO2/US gal | EPA Hub 2025, Table 2 |
-| Aviation gasoline (CO2) | 8.31 | kg CO2/US gal | EPA Hub 2025, Table 2 |
-| Residual fuel oil, marine (CO2) | 11.27 | kg CO2/US gal | EPA Hub 2025, Table 2 |
-| Gasoline passenger car CH4/N2O | by model year, order 0.002–0.02 CH4 / 0.001–0.01 N2O | g/mile | EPA Hub 2025, Table 3 — look up the model-year row |
-| Diesel heavy-duty CH4/N2O | model-year dependent (post-2007 after-treatment raises N2O) | g/mile | EPA Hub 2025, Table 3 |
-| Non-road (forklifts, construction, aircraft, marine) CH4/N2O | per gallon by fuel/equipment | g/gal | EPA Hub 2025, Table 4 |
-| Diesel, 100% mineral (UK) | ≈2.66 | kg CO2e/liter (CO2+CH4+N2O bundled) | DEFRA/DESNZ 2024, Fuels |
-| Diesel, average biofuel blend (UK) | ≈2.51 | kg CO2e/liter | DEFRA/DESNZ 2024 |
-| Petrol, 100% mineral (UK) | ≈2.34 | kg CO2e/liter | DEFRA/DESNZ 2024 |
-| Petrol, average biofuel blend (UK) | ≈2.16 | kg CO2e/liter | DEFRA/DESNZ 2024 |
-| Average diesel car (UK) | ≈0.170 | kg CO2e/km | DEFRA/DESNZ 2024, Passenger vehicles |
-| Average petrol car (UK) | ≈0.164 | kg CO2e/km | DEFRA/DESNZ 2024 |
-| Average diesel van ≤3.5 t (UK) | ≈0.24 | kg CO2e/km | DEFRA/DESNZ 2024, Delivery vehicles |
-| Motor gasoline (IPCC) | 69,300 | kg CO2/TJ (NCV) | IPCC 2006 Vol. 2 Table 3.2.1 |
-| Diesel/gas oil (IPCC) | 74,100 | kg CO2/TJ (NCV) | IPCC 2006 Vol. 2 Table 3.2.1 |
-
-DEFRA per-liter and per-km factors bundle CH4/N2O into CO2e (do not add
-more); EPA factors are per-gas (you add CH4/N2O and pick the GWP set —
-state it per `ghg-protocol` §4).
+This skill intentionally quotes no factor values. When a quantitative answer
+is needed, pull the current-year value from the named source.
 
 ## Unit and conversion traps
 
@@ -285,7 +233,7 @@ state it per `ghg-protocol` §4).
   needed), but energy-basis work (IPCC kg/TJ) is NCV — gasoline/diesel NCV ≈
   GCV × 0.95 (~5%); see the stationary skill's trap list for the full rules.
 - **LPG mass vs volume:** autogas sold per liter (≈0.51 kg/L propane) or per
-  kg; EPA's 5.72 kg CO2/gal is per liquid US gallon.
+  kg; the EPA LPG factor is per liquid US gallon.
 - **CNG units:** scf vs Nm³ vs kg vs GGE/DGE — confirm the dispenser unit;
   1 kg CNG ≈ 48–52 scf depending on composition.
 - **E10 nominal vs actual:** blend share is a volume %, not energy % —
@@ -333,34 +281,36 @@ norm.
   was consumed.
 - **Boundary check:** no 3PL, grey-fleet, or rental fuel in scope 1 totals.
 
-## Worked FAQ
+## FAQ
 
-**Q1. Fleet bought 22,000 gal of diesel (B20 in summer months: 6,000 of the
-22,000 gal). Scope 1?**
-Fossil diesel = 16,000 + 6,000 × 0.80 = 20,800 gal × 10.21 = 212,368 kg.
-Biogenic = 6,000 × 0.20 = 1,200 gal × 9.45 = 11,340 kg biogenic CO2 (outside
-scopes). CH4/N2O per mile from EPA Hub Table 3 using fleet distance (if
-distance unknown, derive from fuel ÷ class mpg and label the assumption).
-**Scope 1 ≈ 212.4 t CO2 + small CH4/N2O; biogenic ≈ 11.3 t.** (EPA Hub 2025.)
+**Q1. Fleet bought 22,000 gal of diesel, of which 6,000 gal was B20 in summer
+months. How is it booked?**
+Split the B20 gallons 80/20 by volume, then total the fossil diesel
+(straight diesel + the 80% share) and apply the current-year Hub Table 2
+diesel CO2 factor → scope 1. The 20% biodiesel share × the Hub Table 2 B100
+factor → biogenic CO2, outside the scopes. CH4/N2O come per mile from Hub
+Table 3 using fleet distance — if distance is unknown, derive it from fuel ÷
+class mpg and label the assumption.
 
-**Q2. Corporate jet uplifted 20,000 gal Jet A. Emissions?**
-CO2 = 20,000 × 9.75 = 195,000 kg = **195 t CO2** (EPA Hub 2025 Table 2).
-CH4/N2O per gallon from Hub Table 4 (aircraft row) add well under 1%. All
-scope 1 if the aircraft is owned/operated; a chartered aircraft is scope 3
-cat. 6. WTT of the fuel → cat. 3.
+**Q2. Corporate jet uplifted 20,000 gal Jet A. How is it treated?**
+Scope 1 if the aircraft is owned/operated; a chartered aircraft is scope 3
+cat. 6, and WTT of the fuel is cat. 3. CO2 = gallons uplifted × the Hub
+Table 2 Jet A factor; CH4/N2O per gallon from Hub Table 4 (aircraft row) add
+well under 1% of the total.
 
 **Q3. Our UK company cars drove 300,000 km but we only know 60% are diesel,
 40% petrol.**
-Diesel: 180,000 km × ≈0.170 = 30,600 kg. Petrol: 120,000 km × ≈0.164 =
-19,680 kg. **Total ≈ 50.3 t CO2e** (DEFRA 2024 average-car per-km factors,
-bundled gases; verify current-year workbook). Record the WTT companion
-(→ cat. 3) separately.
+Method 3: apportion the distance by the fuel split and apply the current-year
+DEFRA "Passenger vehicles" average diesel-car and average petrol-car per-km
+CO2e factors to each share (bundled gases — add nothing on top). Verify the
+workbook year, since fleet-average per-km factors move annually. Record the
+WTT per-km companion (→ cat. 3) separately.
 
 **Q4. Warehouse runs 8 propane forklifts, 2,400 gal LPG/yr.**
-Off-road mobile, scope 1: CO2 = 2,400 × 5.72 = 13,728 kg ≈ **13.7 t**. CH4/N2O
-per gallon from EPA Hub Table 4 (LPG non-road row) — order tens of kg CO2e.
-The forklifts' fuel is mobile combustion even though they never leave the
-site.
+Off-road mobile combustion, scope 1 — even though the forklifts never leave
+the site. CO2 = gallons × the Hub Table 2 LPG factor; CH4/N2O per gallon from
+Hub Table 4 (LPG non-road row), a small addition. Confirm whether the
+"gallons" are liquid volume (they should be — see the LPG unit trap).
 
 **Q5. We leased 10 EVs and 5 PHEVs. What goes where?**
 EVs: no scope 1; charging kWh → scope 2 (`s2-purchased-electricity`),
@@ -370,11 +320,11 @@ gasoline/electric split is unknown, telematics electric-mode share is the
 best allocator. Vehicle manufacturing/leasing overheads → scope 3 (cat. 2/8).
 
 **Q6. Only fuel spend exists: $54,400 diesel across US depots.**
-At the EIA annual average retail diesel price (say $3.85/gal for the year —
-use the actual figure): 54,400 ÷ 3.85 = 14,130 gal × 10.21 = 144,270 kg ≈
-**144.3 t CO2**, flagged as spend-derived (Method 4). Note US pump diesel may
-contain up to 5% biodiesel (B5) without labeling — a ≤1–5% conservatism;
-refine with fuel-card volume data next cycle.
+Method 4: divide by the EIA annual average retail diesel price for the year
+and region, then apply the Hub Table 2 diesel factor to the derived gallons;
+flag as spend-derived. Note US pump diesel may contain up to 5% biodiesel
+(B5) without labeling — a small conservatism; refine with fuel-card volume
+data next cycle.
 
 ## References
 

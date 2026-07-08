@@ -95,38 +95,33 @@ includes/excludes offsets — use with care, strip out avoided-emission
 credits for GHG Protocol reporting); IPCC 2006 GL vol. 5 (first-order decay
 landfill CH4, incineration) for first-principles work.
 
-**Worked example — packaged beverage producer.** Sold in the US market:
-20,000 t PET bottles, 5,000 t aluminum cans, 8,000 t corrugated secondary
-packaging. US disposal mix (EPA Facts & Figures, 2018 data — verify
-current): PET ~29% recycled / ~17% combusted / ~54% landfilled; aluminum
-cans ~50% recycled / ~12% combusted / ~38% landfilled; corrugated ~90%+
-recycled / remainder split.
-
-Illustrative EFs (DEFRA 2024 waste-disposal factors, kgCO2e/t — verify
-current edition; DEFRA's landfill factors embed UK gas-capture rates,
-US landfills differ — disclose if applying to US mix):
-PET landfill ≈ 9 (inert, near-zero decay); PET incineration ≈ 2,290 stoich.
-fossil CO2 if counting combustion at the EfW plant (note: DEFRA's own EfW
-convention allocates combustion CO2 to the energy generated and reports
-~21 kgCO2e/t "combustion" for the waste generator — state which convention
-you follow; the conservative product-footprint treatment counts the fossil
-CO2); recycling ≈ 21 (collection only, cut-off); aluminum landfill ≈ 9
-(inert), recycling ≈ 21; corrugated landfill ≈ 1,000 (biogenic CH4,
-material-specific — verify), recycling ≈ 21, incineration (biogenic CO2
-outside scopes; CH4/N2O small).
-
-Using the conservative EfW convention for plastics:
+**Method walk-through — packaged goods.** Symbolic:
 
 ```text
-PET:  20,000 × (0.54×0.009 + 0.17×2.29 + 0.29×0.021) = 20,000 × 0.400 = 8,006 tCO2e
-Alu:   5,000 × (0.38×0.009 + 0.12×0.021 + 0.50×0.021) = 5,000 × 0.0164 =    82 tCO2e
-Corr:  8,000 × (0.05×1.00  + 0.03×0.021 + 0.92×0.021) = 8,000 × 0.0700 =   560 tCO2e
-C12 ≈ 8,650 tCO2e   (+ biogenic CO2 memo from corrugated combustion/decay)
+1. m_(material) = mass sold per material   ← BOM × units sold, plus packaging
+                  specifications (EPR filings are an audit-ready mass source)
+2. share_(material, pathway, market)       ← EPA Facts & Figures (US) /
+                  Eurostat (EU) / national statistics, year-stamped,
+                  weighted by sales-market mix
+3. EF_(material, pathway)                  ← DEFRA waste-disposal tables
+                  (current edition), WARM, or IPCC — state the EfW convention
+4. C12 = Σ_materials Σ_pathways m × share × EF
+   (landfill CH4 in scope; biogenic CO2 reported as a memo item)
 ```
 
-**Pitfalls:** (a) mixing the DEFRA "generator" convention (EfW CO2 allocated
-to energy user, ~21 kg/t) with stoichiometric fossil-CO2 EfW factors —
-results differ ~100×, pick one and disclose; (b) applying UK
+**The energy-from-waste convention choice (state it).** For fossil-carbon
+materials (plastics, synthetic textiles) two defensible conventions exist:
+count the stoichiometric fossil CO2 released at the EfW plant against the
+discarded product, or follow DEFRA's generator convention, which allocates
+combustion CO2 to the energy user and leaves the waste generator only a
+small collection-level factor. For plastics the two differ by orders of
+magnitude — pick one, apply it consistently YoY, and disclose. Note also
+that landfill factors embed a gas-capture assumption (DEFRA's reflect UK
+capture rates); applying them to low-capture markets requires disclosure.
+
+**Pitfalls:** (a) mixing the DEFRA generator convention with stoichiometric
+fossil-CO2 EfW factors — results differ by orders of magnitude for
+plastics, pick one and disclose; (b) applying UK
 landfill-gas-capture-adjusted factors to markets with low capture;
 (c) forgetting packaging mass entirely; (d) treating "recycled" share with a
 zero factor *and* crediting avoided virgin material (double benefit).
@@ -140,34 +135,31 @@ factor:
 C12 = total mass of products + packaging sold (t) × mixed-MSW disposal EF (tCO2e/t)
 ```
 
-E.g., DEFRA 2024 "municipal waste to landfill" ≈ 446 kgCO2e/t (verify).
-A 100,000 t sales mass → `100,000 × 0.446 = 44,600 tCO2e` upper-bound-style
-screen. Pitfall: wildly wrong material mix (inert-heavy products overstated,
-food/paper-heavy understated) — use only to decide whether tier 1 effort is
-warranted.
+Use the mixed-MSW landfill factor from the current DEFRA waste tables as an
+upper-bound-style screen. Pitfall: the implied material mix can be wildly
+wrong (inert-heavy products overstated, food/paper-heavy understated) — use
+only to decide whether tier 1 effort is warranted.
 
-## Emission factors / parameters quick reference
+## Emission factor and parameter sources
 
-Representative values; **verify against the named current edition** and
-record source/year/units. All kgCO2e per metric tonne of material.
+Record source, edition/vintage, and units for every input per the
+`ghg-protocol` skill §7.
 
-| Material | Landfill | Incineration/EfW | Recycling (cut-off) | Compost | Source + vintage |
-|---|---|---|---|---|---|
-| Mixed MSW | ~446 | see convention note | ~21 | — | DEFRA 2024 waste factors |
-| Food waste | ~630 | ~21 (DEFRA conv.) | — | ~9–10 | DEFRA 2024 |
-| Paper & board | ~1,000 (CH4-driven) | biogenic CO2 (memo) + minor CH4/N2O | ~21 | — | DEFRA 2024 (verify exact) |
-| Plastics (avg) | ~9 (inert) | ~2,300–3,100 fossil CO2 stoich. (PET 2,290; HDPE ~3,140) or ~21 under DEFRA generator convention | ~21 | — | Stoichiometry / DEFRA 2024 — state convention |
-| Glass | ~9 (inert) | — | ~21 | — | DEFRA 2024 |
-| Metals (steel/alu) | ~9 (inert) | — | ~21 | — | DEFRA 2024 |
-| Textiles (synthetic) | low decay | fossil CO2 by fiber | ~21 | — | DEFRA 2024 / stoichiometry |
-| Wood | ~800–830 (CH4) | biogenic CO2 (memo) | ~21 | — | DEFRA 2024 (verify) |
+| Source | Governing table / dataset | Coverage | Units convention | Cadence |
+|---|---|---|---|---|
+| UK DESNZ/DEFRA conversion factors | "Waste disposal" tables | Material × pathway EFs (landfill, EfW under the generator convention, recycling/collection, composting) | kgCO2e per metric tonne | Annual |
+| EPA WARM model | Material-pathway factors | US materials; embeds avoided-emission credits — strip them for GHG Protocol reporting | per US short ton | Periodic versions |
+| IPCC 2006 GL vol. 5 | First-order-decay landfill CH4; incineration | First-principles modeling; stoichiometric fossil CO2 for plastics EfW | per Gg / per tonne | Static |
+| EPA *Advancing Sustainable Materials Management: Facts and Figures* | Generation and management (recycled/combusted/landfilled/composted) by material | US disposal mixes | % shares, short-ton basis | Periodic data years |
+| Eurostat waste statistics (env_wasmun; env_waspac) | Municipal and packaging-waste treatment | EU member-state disposal mixes | % shares, metric tonnes | Annual |
+| WRAP; national agencies (UK DEFRA statistics, Japan MOE) | Market-specific mixes; household food-waste shares | UK and other markets | % shares | Periodic |
 
-**Disposal-mix reference points (verify current):** US MSW overall (EPA
-Facts & Figures, 2018 data): ~50% landfill, ~12% combustion w/ energy
-recovery, ~24% recycled, ~9% composted. EU varies widely by member state
-(Eurostat: DE/NL/SE near-zero landfill, high EfW+recycling; some member
-states >50% landfill) — never apply a single "EU average" to
-country-concentrated sales without disclosure.
+Disposal mixes vary enormously by market (some EU member states landfill
+almost nothing; others most of their MSW) — never apply a single regional
+average to country-concentrated sales without disclosure.
+
+This skill intentionally quotes no factor values. When a quantitative
+answer is needed, pull the current-year value from the named source.
 
 ## Unit and conversion traps
 
@@ -175,7 +167,7 @@ country-concentrated sales without disclosure.
 - **Product mass vs. packaging mass:** both are in scope; BOM mass excludes packaging — add packaging specs separately. Watch net vs. gross shipping mass and per-unit vs. per-case packaging.
 - **Percent conventions:** disposal mixes published as % of *generation* vs. % of *discards after recycling* — EPA reports both; mixing bases misallocates 20–30 points.
 - **Biogenic split:** landfill CH4 in-scope; biogenic decomposition/combustion CO2 outside the scopes as memo (`ghg-protocol` skill §5). Do not zero-out paper landfill because "it's biogenic" — the CH4 is the point.
-- **EfW conventions:** stoichiometric fossil CO2 at the plant vs. DEFRA's allocate-to-energy-user convention (~21 kg/t) differ by orders of magnitude for plastics. State the convention; be consistent YoY.
+- **EfW conventions:** stoichiometric fossil CO2 at the plant vs. DEFRA's allocate-to-energy-user convention differ by orders of magnitude for plastics. State the convention; be consistent YoY.
 - **Landfill gas capture:** factors embed a capture assumption (UK ~ high capture; many markets ~0%) — geographic mismatch materially biases CH4-heavy materials.
 - **kg vs. t and short ton vs. tonne:** EPA data in US short tons (0.907 t); DEFRA per metric tonne.
 
@@ -198,42 +190,43 @@ country-concentrated sales without disclosure.
 
 ## Worked FAQ
 
-**Q1. We sell 3,000 t of food products (plus 400 t plastic film, 600 t
-board packaging) in the UK. Estimate C12.**
-Note: food *consumed* is not waste; assume 15% household food waste share
-(WRAP data — verify): 450 t food waste. UK mix (DEFRA/WRAP, verify): food →
-~40% landfill-equivalent residual, 60% collected organics; film → residual
-(mostly EfW in UK); board → 80% recycled.
-Food: `450 × (0.40×0.63 + 0.60×0.010) ≈ 116 t`.
-Film (DEFRA generator convention): `400 × 0.021 ≈ 8 t` (or `400 × ~2.5 =
-1,000 t` counting stoichiometric fossil CO2 — convention choice, disclose).
-Board: `600 × (0.80×0.021 + 0.20×1.00) ≈ 130 t`.
-Total ≈ **254 tCO2e** (generator convention) — plus biogenic memo.
+**Q1. We sell food products with plastic film and board packaging in the
+UK. How do we structure C12?**
+Three material streams, each mass × mix × factor. Food: only the *wasted*
+share is waste — apply a household food-waste share from WRAP (a sourced
+statistic, not a guess), then the UK organics-vs-residual split. Film: a
+residual stream (mostly EfW in the UK) — the EfW convention choice drives
+this term by orders of magnitude, so state it. Board: mostly recycled
+(collection-level factor), with the landfilled remainder carrying biogenic
+CH4 in scope. Factors from the current DEFRA waste tables; biogenic CO2 as
+a memo item.
 
 **Q2. Are avoided emissions from our recyclable packaging a credit here?**
 No. Category 12 reports gross treatment emissions; avoided-burden credits
 are not netted into scope 3 totals. You may discuss avoided emissions
 separately outside the inventory, clearly labeled.
 
-**Q3. Our electronics contain 2,000 t mixed WEEE sold into the EU. Approach?**
-Use Eurostat WEEE collection/treatment rates (~45–55% formally collected —
-verify current): formally treated share → recycling/collection factors
-(~21 kg/t) plus specific treatment of hazardous fractions; uncollected share
-→ mixed-MSW fate of the destination market. `2,000 × (0.5×0.021 + 0.5×0.30)
-≈ 321 tCO2e` illustrative; refine with WEEE-scheme data. Refrigerant in the
-WEEE goes to category 11's lifetime-release term, not here.
+**Q3. Our electronics ship as mixed WEEE into the EU. Approach?**
+Split the sold mass into formally collected vs. uncollected using Eurostat
+WEEE collection/treatment rates (current year). Formally treated share →
+recycling/collection factors plus specific treatment of hazardous
+fractions; uncollected share → the destination market's mixed-MSW fate.
+Refine with WEEE-scheme data where available. Refrigerant in the WEEE goes
+to category 11's lifetime-release term, not here.
 
 **Q4. Does compostable packaging zero out our C12 for that mass?**
-No. Composting has a small factor (~9–10 kgCO2e/t, DEFRA 2024 — verify) and
+No. Composting carries a small but nonzero factor (DEFRA waste tables), and
 only for the share that actually reaches composting; certified-compostable
-material landfilled still generates CH4. Weight by the real market's organics
-capture rate.
+material landfilled still generates CH4. Weight by the real market's
+organics-capture rate.
 
 **Q5. We sell industrial pumps (steel-dominated, 25-yr life). Is C12
 material?**
-Rarely: metals are inert in landfill and mostly recycled — `1,000 t ×
-(0.85×0.021 + 0.15×0.009) ≈ 19 tCO2e` per 1,000 t sold. Screen, report the
-small number or justify exclusion with the screen documented.
+Rarely: metals are inert in landfill and predominantly recycled, so the
+waste-type-specific method returns a very small figure per tonne sold. Run
+the screen with current DEFRA metal factors and the market's metals
+recycling rate, then report the small number or document a justified
+exclusion with the screen on file.
 
 ## References
 

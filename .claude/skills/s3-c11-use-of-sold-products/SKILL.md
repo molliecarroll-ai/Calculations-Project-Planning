@@ -278,48 +278,27 @@ consistently across products and years, and do not mix current-factor and
 trajectory methods silently. Static current-year factors remain the
 conservative, most-auditable default.
 
-## Emission factors / parameters quick reference
+## Emission factor and parameter sources
 
-All values below are for orientation — **verify against the named source's
-current edition before use**, and record source/year/units per the
+Record source, edition/vintage, and units for every input per the
 `ghg-protocol` skill §7.
 
-**Fuel combustion EFs (fossil CO2; add CH4/N2O ≈ +0.3–1%):**
+| Source | Governing table / dataset | Coverage | Units convention | Cadence |
+|---|---|---|---|---|
+| EPA GHG Emission Factors Hub | Fuel combustion tables (stationary + mobile CH4/N2O) | US fuel combustion (gasoline, diesel, natural gas, LPG, jet fuel) | per gallon / per MMBtu, HHV basis | Annual |
+| UK DESNZ conversion factors | Fuel and UK-electricity tables | UK fuels and grid | per litre / per kWh | Annual |
+| IPCC 2006 GL vol. 2 | Fuel combustion defaults | Global defaults | per TJ, NCV basis | Static |
+| IMO GHG studies | Marine fuel factors | Marine fuels | t per t fuel | Periodic |
+| EPA eGRID | Subregion output emission rates | US grid, subregional and national | per MWh (convert to kWh) | Biennial data releases |
+| IEA emission factors | Country grid intensities | Non-US grids; world average | per kWh | Annual |
+| IPCC 2006 GL vol. 3 ch. 7 / EPA Vintaging Model | Leak and recovery defaults by equipment type | GHG-containing products (refrigerants, SF6 gear, aerosols) | % of charge per yr; % recovered at EOL | Static / periodic |
+| IPCC assessment report (declared AR set) | GWP tables | Refrigerant and gas GWPs, blend-weighted | 100-yr GWP | Per assessment cycle |
+| ENERGY STAR / DOE / EU energy-label databases | Certified-product listings, TEC values | Per-model annual energy use | kWh/yr | Continuous |
+| WLTP / EPA fuel-economy certification; ICCT gap studies | Test-cycle values; real-world uplift | Vehicle fuel/energy consumption | L/100 km, mpg, kWh/100 km | Model-year / periodic |
+| National transport and scrappage statistics; fleet data; OEM disclosures | Lifetime activity and lifetime-years assumptions | Lifetime governance by market (published vehicle lifetime-km assumptions span roughly 150,000–240,000 km — a modeling assumption to disclose, not an EF) | km, yr | Review on a set cycle |
 
-| Fuel | EF | Units | Source + vintage |
-|---|---|---|---|
-| Motor gasoline | 8.78 (≈2.32/L) | kgCO2/gal | EPA GHG EF Hub, 2025 ed. |
-| Diesel | 10.21 (≈2.70/L) | kgCO2/gal | EPA GHG EF Hub, 2025 ed. |
-| Natural gas | 53.06 | kgCO2/MMBtu (HHV) | EPA Hub 2025; IPCC NCV basis differs — see traps |
-| LPG/propane | 5.72 (≈1.51/L) | kgCO2/gal | EPA Hub 2025 |
-| Jet fuel (Jet A) | 9.75 | kgCO2/gal | EPA Hub 2025 |
-| Marine HFO | 3.114 | tCO2/t fuel | IMO 4th GHG Study (2020) |
-
-**Grid electricity (location-based, generation + T&D as published):**
-
-| Grid | EF | Units | Source + vintage |
-|---|---|---|---|
-| US national average | ~0.37 | kgCO2e/kWh | eGRID 2023 data (pub. 2025) — use subregion where possible |
-| UK | ~0.207 | kgCO2e/kWh | DESNZ 2024 conversion factors |
-| EU-27 average | ~0.21–0.25 | kgCO2e/kWh | EEA/IEA latest year |
-| China | ~0.55–0.60 | kgCO2e/kWh | IEA emission factors (latest) |
-| World average | ~0.44 | kgCO2e/kWh | IEA (latest) |
-
-**Lifetime / use-intensity typicals (label as assumptions, cite basis):**
-
-| Product | Lifetime | Use intensity | Basis |
-|---|---|---|---|
-| Passenger car | 12–18 yr / 150,000–240,000 km by market | 10,000–19,000 km/yr | National transport statistics; OEM disclosures; disclose market weighting |
-| Heavy truck | ~1,000,000+ km | 60,000–120,000 km/yr | Fleet data |
-| Refrigerator | 12–15 yr | 300–500 kWh/yr | DOE/ENERGY STAR label data |
-| Washing machine | 10–12 yr | ~180–300 cycles/yr | ENERGY STAR; habit surveys |
-| Room AC / heat pump | 10–15 yr | climate-zone dependent | DOE test procedures; charge + leak per IPCC 2006 GL v3 ch.7 |
-| Laptop | 4–6 yr | 30–60 kWh/yr | ENERGY STAR TEC values |
-| Gas boiler (residential) | 15–20 yr | 10,000–20,000 kWh_fuel/yr | National heating statistics |
-
-**Refrigerant GWPs (100-yr):** R-134a — AR5 1,300 / AR6 1,530; R-410A —
-AR5 ≈1,924 / AR6 ≈2,256 (blend-weighted); SF6 — AR5 23,500 / AR6 25,200.
-One AR set inventory-wide (`ghg-protocol` skill §4).
+This skill intentionally quotes no factor values. When a quantitative
+answer is needed, pull the current-year value from the named source.
 
 ## Unit and conversion traps
 
@@ -345,7 +324,7 @@ One AR set inventory-wide (`ghg-protocol` skill §4).
 ## QA checks
 
 - **Dominance sanity:** for OEMs, appliance/electronics makers, and fuel sellers, category 11 should usually be the largest category — often >70% of total scope 1+2+3. If it is not, first suspect a lifetime term dropped or an installed-base (annual) computation.
-- **Per-unit sanity:** lifetime tCO2e per unit against benchmarks — ICE car ~25–50 t; refrigerator ~1–2 t; laptop ~0.05–0.15 t (use-phase only); 1 L gasoline ≈ 2.3 kg. Outliers → unit audit.
+- **Per-unit sanity:** lifetime tCO2e per unit against published product-footprint benchmarks — an ICE car sits in the tens of tonnes, a refrigerator in low single tonnes, a laptop well under one tonne (use-phase only). Outliers → unit audit.
 - **Lifetime-assumption consistency YoY:** same lifetimes/use intensities as last year unless a disclosed method change; a silent change is the classic way a category 11 number moves 20% with no real-world cause.
 - **Cohort completeness:** Σ units in the calculation = units sold per the ledger, every market, including fleet/B2B channels.
 - **Double-counting sweeps:** sold vs. leased units (11 vs. 13); component vs. final-product accounting if you sell both into the same vehicles (11 vs. 10); GHG-release EOL fraction (11 vs. 12); fuel sold to franchisees (11 vs. 14).
@@ -354,24 +333,28 @@ One AR set inventory-wide (`ghg-protocol` skill §4).
 
 ## Worked FAQ
 
-**Q1. We sold 120,000 diesel vans (lifetime 250,000 km, real-world
-9.5 L/100 km). Category 11?**
-`250,000 × 9.5/100 = 23,750 L/van; × 2.72 kgCO2e/L (EPA Hub 2025 + CH4/N2O,
-verify) = 64.6 tCO2e/van; × 120,000 = 7,752,000 tCO2e ≈ 7.75 Mt.` Disclose
-lifetime-km source and the real-world basis.
+**Q1. We sold a cohort of diesel vans. What goes into category 11?**
+Four inputs, each with named provenance: units sold by market (sales/ERP,
+reconciled to revenue); a disclosed lifetime-km assumption per market
+(national statistics or fleet data — the single most result-moving input,
+governed per the lifetime rules above); real-world L/100 km (test-cycle
+value plus a disclosed uplift, ICCT gap studies); and the current-edition
+diesel combustion EF from the market's source (EPA Hub / DESNZ). Compute
+units × lifetime km × L/100 km ÷ 100 × EF, summed by market.
 
-**Q2. Our TVs: 800,000 units, 110 kWh/yr label value, 7-yr lifetime, sold
-55% EU / 45% US.**
-EU: `800,000×0.55 × 110 × 7 × 0.23 kgCO2e/kWh = 77,924 t` (EEA latest — verify).
-US: `800,000×0.45 × 110 × 7 × 0.37 = 102,564 t` (eGRID 2023 US avg).
-Total ≈ **180,500 tCO2e**. Label values may understate real viewing hours —
-note the data-quality limitation.
+**Q2. Our TVs sell into both the EU and the US. How do we handle the
+market split?**
+Split the sales cohort by market and apply each market's grid-factor source —
+eGRID (subregional where possible) for US units, EEA/IEA/national factors
+for EU units — against sales-weighted label energy (kWh/yr) × lifetime
+years. Label values may understate real viewing hours — note the
+data-quality limitation rather than silently uplifting.
 
-**Q3. We're a natural gas utility selling 30 million MMBtu to end users.**
-Sold fuel: `30e6 MMBtu × 53.06 kgCO2/MMBtu = 1.592e9 kg ≈ 1,592,000 tCO2e`
-(EPA Hub 2025, HHV — verify), plus CH4/N2O (+~0.1%). Gas you combusted in
-own operations is scope 1, not category 11; T&D losses/leaks are scope 1
-(fugitives) for your pipeline.
+**Q3. We're a natural gas utility selling to end users. Category 11?**
+Yes — gas sold for combustion is a sold fuel: metered quantity sold × the
+combustion EF from the current EPA Hub edition, matching the HHV/NCV basis
+of your billing units. Gas you combusted in own operations is scope 1, not
+category 11; T&D losses/leaks are scope 1 (fugitives) for your pipeline.
 
 **Q4. Do we report the installed base's emissions each year until products
 retire?**
@@ -392,15 +375,16 @@ product's use-phase (units × vehicle lifetime fuel), disclose the approach —
 and never claim category 11 = 0 silently. OEM assembly energy is your
 category 10 either way.
 
-**Q6. Heat pumps: 60,000 units, 1.1 kg R-32 charge (GWP AR5 677), 3%/yr leak
-× 15 yr + 30% EOL release of remainder; 3,500 kWh/yr electricity × 15 yr,
-EU grid 0.23 kgCO2e/kWh.**
-Refrigerant: release = 45% + 0.30×55% = 61.5%;
-`60,000 × 1.1 × 0.615 × 677 / 1,000 = 27,480 tCO2e`.
-Energy: `60,000 × 3,500 × 15 × 0.23 / 1,000 = 724,500 tCO2e`.
-Total ≈ **752,000 tCO2e** — energy dominates; both mechanisms required.
-Optional refinement: declining EU grid trajectory would cut the energy term
-materially; disclose scenario if used.
+**Q6. Heat pumps: which mechanisms do we account?**
+Two, summed per unit sold. (a) Refrigerant: charge per unit (BOM/type
+approval) × lifetime release fraction — annual leak rate × lifetime years
+plus the EOL share of the remaining charge (defaults from IPCC 2006 GL
+vol. 3 ch. 7 / EPA Vintaging Model) — × the GWP of the charged gas from
+your declared AR set. (b) Electricity: annual kWh (label or field data) ×
+lifetime years × the sales market's grid factor. Energy typically
+dominates, but both mechanisms are required. Optional refinement: a
+declining grid trajectory cuts the energy term materially — disclose the
+scenario source if used.
 
 ## References
 
