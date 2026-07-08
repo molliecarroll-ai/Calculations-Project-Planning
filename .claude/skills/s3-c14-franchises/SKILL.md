@@ -154,7 +154,7 @@ answer is needed, pull the current-year value from the named source.
 - **Floor area basis:** kitchen + dining vs. total building; leased pad sites; ft² vs. m² (× 10.764); kBtu vs. kWh (÷ 3.412).
 - **Location count vs. system data:** brand marketing "units" counts can include licensed shelf-space or ghost kitchens with very different intensities — reconcile to the franchise disclosure document location list.
 - **Therms/MMBtu/HHV:** US gas billing in therms (1 therm = 0.1 MMBtu HHV); EPA factors HHV (`ghg-protocol` skill §7).
-- **Refrigerants:** kg of charge × GWP of the actual refrigerant (R-404A-heavy commercial refrigeration is high-GWP, AR5 ≈ 3,943 — blend-weight per `s1-fugitive-emissions`); one AR set inventory-wide (`ghg-protocol` skill §4).
+- **Refrigerants:** kg of charge × GWP of the actual refrigerant — R-404A-heavy commercial refrigeration is notably high-GWP; blend-weight per `s1-fugitive-emissions`; one AR set inventory-wide (`ghg-protocol` skill §4).
 
 ## Data collection & gap-filling
 
@@ -167,7 +167,7 @@ answer is needed, pull the current-year value from the named source.
 ## QA checks
 
 - **Location reconciliation:** company-owned + franchised = total system; each location in exactly one of scope 1/2 or category 14; conversions pro-rated.
-- **Per-location sanity:** implied tCO2e/location within format benchmarks (a US QSR typically ~100–250 tCO2e/yr S1+S2; a full-service hotel far more); outliers audited for unit errors.
+- **Per-location sanity:** implied tCO2e/location within format benchmarks (derive them from the covered sample per format; a full-service hotel far exceeds a QSR); outliers audited for unit errors.
 - **Extrapolation-bias check:** covered-location average vs. system-wide format/climate mix; adjust stratification if covered sample skews.
 - **Completeness:** franchisee vehicles and refrigerants included or their exclusion disclosed for formats where material.
 - **YoY method consistency:** same intensity sources and stratification; coverage-driven changes (more actual data) disclosed as method improvement, base year per the `ghg-protocol` skill §6.
