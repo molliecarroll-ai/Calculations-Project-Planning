@@ -60,9 +60,9 @@ category 5 + category 12 discussion of the recycled-content vs. closed-loop
 methods):
 - **Recycled-content method**: recycling burdens/benefits accrue to the user
   of the recycled material; the waste generator reports only **collection and
-  processing up to the point of recycling** (sorting/MRF). This is why DEFRA's
-  open-loop/closed-loop recycling factors are near-zero (~21 kgCO2e/t for most
-  materials, DESNZ 2024 — processing only).
+  processing up to the point of recycling** (sorting/MRF). This is why the
+  DEFRA open-loop/closed-loop recycling factors are near-zero for most
+  materials — they cover processing only.
 - **Closed-loop method**: the generator may account for recycling process
   emissions and could, in an attributional sense, see avoided-virgin-material
   benefits — but **avoided emissions may never be netted from scope 3 totals**;
@@ -113,39 +113,32 @@ credits — strip credits and re-normalize the GWP set to your inventory's.
 **When to use:** you know tonnes by material type and disposal route. This is
 the recommended tier for material category-5 footprints because landfill CH4
 depends overwhelmingly on material: food and paper degrade anaerobically
-(high CH4), while **plastics, metals, and glass do not degrade in landfill —
-their landfill factor is essentially transport/site operations only (~9
-kgCO2e/t, DESNZ 2024)**.
+(high CH4 per tonne — paper/board and food are the highest common streams),
+while **plastics, metals, and glass do not degrade in landfill — their
+landfill factor covers essentially transport/site operations only, near-zero
+relative to organics**.
 
 ```
 CO2e = Σ_materials Σ_routes  mass_m,r [tonnes] × EF_m,r [kgCO2e/tonne] / 1000
 ```
 
-**EF sources:** EPA WARM (US; latest version — v16, 2023 at time of writing —
-verify current; MTCO2e/short ton, includes avoided-emission elements you may
-need to strip for attributional reporting — use WARM's landfill/combustion
-gross components carefully), UK DESNZ/DEFRA GHG Conversion Factors "Waste
-disposal" tables (annual; kgCO2e/tonne, attributional, transport-to-site
-included). See `ghg-protocol` §7 for hierarchy.
+**EF sources:** EPA WARM (US; verify current version; MTCO2e/short ton,
+includes avoided-emission elements you may need to strip for attributional
+reporting — use WARM's landfill/combustion gross components carefully), UK
+DESNZ/DEFRA GHG Conversion Factors "Waste disposal" tables (annual;
+kgCO2e/tonne, attributional, transport-to-site included). See `ghg-protocol`
+§7 for hierarchy.
 
-**Worked example.** An office campus generates in the reporting year: 120 t
-mixed food waste to composting, 300 t paper to recycling, 85 t mixed
-commercial waste to landfill. Using DESNZ 2024 factors (verify current
-vintage before use):
-
-```
-Food → composting:   120 t × 8.9  kgCO2e/t = 1,068 kgCO2e = 1.07 tCO2e
-Paper → recycling:   300 t × 21.3 kgCO2e/t = 6,390 kgCO2e = 6.39 tCO2e
-Mixed → landfill:     85 t × 494  kgCO2e/t = 41,990 kgCO2e = 41.99 tCO2e
-Category 5 total: 1.07 + 6.39 + 41.99 = 49.45 tCO2e
-```
-
-Note the shape: 85 t of landfilled mixed waste dominates 420 t of diverted
-material — typical, and the reason route data matters more than precision on
-diverted tonnage. **Pitfalls:** applying the mixed-waste landfill factor to a
-plastics-only stream (overstates ~50×); using WARM net factors (which embed
-avoided emissions) as if attributional; short tons (WARM) vs. metric tonnes
-(DEFRA).
+**Method walk-through:** take tonnes by material and route from the hauler's
+annual summary or a waste audit; for each material-route pair pull the
+current-year DESNZ factor (or WARM gross component for US sites); multiply
+and sum. Expect the landfilled mixed/organic tonnage to dominate the total
+even when diverted tonnage is several times larger — route data matters more
+than precision on diverted tonnage. **Pitfalls:** applying the mixed-waste
+landfill factor to a plastics-only stream (overstates dramatically —
+plastics-to-landfill is near-inert while mixed waste carries the
+organic-fraction CH4); using WARM net factors (which embed avoided emissions)
+as if attributional; short tons (WARM) vs. metric tonnes (DEFRA).
 
 ### Method 3 — Average-data
 
@@ -156,17 +149,13 @@ CO2e = Σ_routes  total mass_r [t] × mixed-waste EF_r [kgCO2e/t] / 1000
 ```
 
 Use "commercial and industrial mixed" or "municipal mixed" factors matched to
-your waste character. **Worked example:** 500 t mixed commercial waste, 60% to
-landfill, 40% to incineration with energy recovery (DESNZ 2024):
-
-```
-Landfill:  500 × 0.60 = 300 t × 494 kgCO2e/t  = 148.2 tCO2e
-WtE:       500 × 0.40 = 200 t × 21.3 kgCO2e/t =   4.3 tCO2e
-Total ≈ 152.5 tCO2e
-```
-
-**Pitfall:** hauler "diversion rate" claims often count WtE as diversion;
-your inventory must model the actual route.
+your waste character. **Method walk-through:** split total tonnage by route
+(landfill vs. WtE vs. recycling per the hauler's destination data); multiply
+each route's tonnage by the current mixed-waste factor for that route. The
+landfill share will dominate the result under current conventions
+(WtE-combustion and recycling factors are low). **Pitfall:** hauler
+"diversion rate" claims often count WtE as diversion; your inventory must
+model the actual route.
 
 ### Method 4 — Proxy (per-FTE benchmark)
 
@@ -174,9 +163,10 @@ your inventory must model the actual route.
 tonnes = FTE × waste-generation benchmark [t/FTE/yr]  → apply Method 3
 ```
 
-Office benchmark: roughly **0.15–0.3 t/FTE/yr** of mixed office waste (varies
-by geography and program maturity; derive your own from measured sites and
-apply to unmeasured ones — a like-facility intensity per `ghg-protocol` §8).
+Office benchmark: roughly **0.15–0.3 t/FTE/yr** of mixed office waste (a
+waste-generation statistic, not an emission factor; varies by geography and
+program maturity; derive your own from measured sites and apply to unmeasured
+ones — a like-facility intensity per `ghg-protocol` §8).
 
 ### Method 5 — Spend-based
 
@@ -187,8 +177,8 @@ CO2e = waste-service spend [$] × EEIO waste-sector factor [kgCO2e/$]
 ```
 
 US commercial mixed-waste disposal cost is on the order of **$60–110/t**
-tipping plus hauling (highly regional — verify local). Screening only;
-document the price assumption.
+tipping plus hauling (a price statistic, highly regional — verify local).
+Screening only; document the price assumption.
 
 ### Wastewater
 
@@ -198,35 +188,30 @@ Third-party (municipal) treatment of operational wastewater:
 CO2e = volume [m³] × treatment EF [kgCO2e/m³] / 1000
 ```
 
-DESNZ 2024 water-treatment factor ≈ **0.27 kgCO2e/m³** (verify vintage; UK
-average, covers treatment CH4/N2O and plant energy). If volume is unmetered,
-proxy from water supply volume × a discharge fraction (often ~0.9–0.95 for
-offices). Industrial high-COD effluent needs IPCC 2006 GL vol. 5 ch. 6
-COD-based CH4 estimation instead — flag and escalate.
+Apply the current DESNZ "Water treatment" factor (UK average; covers
+treatment CH4/N2O and plant energy — verify vintage and geographic fit). If
+volume is unmetered, proxy from water supply volume × a discharge fraction
+(often ~0.9–0.95 for offices). Industrial high-COD effluent needs IPCC 2006
+GL vol. 5 ch. 6 COD-based CH4 estimation instead — flag and escalate.
 
-## Emission factors quick reference
+## Emission factor sources
 
-All values **DESNZ/DEFRA UK GHG Conversion Factors 2024, kgCO2e/tonne,
-AR5 GWPs** unless noted. Representative, for orientation — **always pull the
-current-year table before calculating**, and check geographic fit (UK landfill
-gas capture rates are embedded; US landfills differ).
+| Source | Governing table | Coverage | Units convention | Cadence |
+|---|---|---|---|---|
+| UK DESNZ/DEFRA GHG Conversion Factors | "Waste disposal" tab; "Water treatment" tab | Material × route matrix (landfill, combustion/WtE, recycling, composting, AD); municipal wastewater. UK landfill-gas-capture assumptions embedded — check geographic fit | kg CO2e per tonne (wet, as-collected); kg CO2e per m³ for water | Annual |
+| EPA WARM | Latest model version + documentation chapters | US materials × pathways, with US landfill-gas-collection scenarios | MTCO2e per short ton (1 short ton = 0.9072 tonne); net factors embed carbon-storage and avoided-emission terms — use gross components for attributional work | Periodic versions — verify current |
+| IPCC 2006 Guidelines, vol. 5 (Waste) | FOD landfill model; wastewater CH4/N2O chapters | Site-specific/industrial modeling | Parameter-based, not lookup factors | 2019 Refinement |
 
-| Material → route | EF (kgCO2e/t) | Note |
-|---|---|---|
-| Mixed municipal/commercial → landfill | ~450–590 (2024 table: 494) | Lifetime CH4, UK capture assumptions |
-| Food waste → landfill | ~630 | High degradable carbon |
-| Paper/board → landfill | ~1,000+ | Highest CH4 among common streams |
-| Plastics → landfill | ~9 | No degradation; transport/ops only |
-| Any material → recycling (open/closed loop) | ~21 | Collection + processing to point of recycling |
-| Mixed waste → combustion (WtE) | ~21 | No energy credit inside factor |
-| Food/garden → composting | ~9–10 | CH4/N2O from windrows |
-| Food → anaerobic digestion | ~9 | Similar magnitude to composting |
-| Wastewater treatment | ~0.27 kgCO2e/m³ | UK average |
+**Relative-magnitude structure (methodology, retained without values):**
+paper/board and food to landfill carry the highest per-tonne factors
+(anaerobic CH4); mixed municipal/commercial landfill sits below the pure
+organic streams; plastics, metals, and glass to landfill are near-inert;
+recycling (processing-only convention), WtE combustion (no energy credit),
+composting, and AD are all low — one to two orders of magnitude below
+organic-to-landfill.
 
-EPA WARM (US): factors in **MTCO2e/short ton**; convert 1 short ton = 0.9072
-tonne; WARM models US landfill gas collection scenarios and includes
-carbon-storage and avoided-emission terms — use component-level outputs for
-attributional inventories.
+This skill intentionally quotes no factor values. When a quantitative answer
+is needed, pull the current-year value from the named source.
 
 ## Unit and conversion traps
 
@@ -276,32 +261,34 @@ attributional inventories.
 ## Worked FAQ
 
 **Q1. We send 40 t of office paper to recycling and 10 t to landfill. Which
-dominates?** Landfill, heavily. Paper → landfill ≈ 10 t × ~1,041 kgCO2e/t
-(DESNZ 2024, verify) = **10.4 tCO2e**; paper → recycling ≈ 40 t × 21.3 = **0.85
-tCO2e**. The 10 landfilled tonnes are ~12× the 40 recycled tonnes.
+dominates?** The landfilled tonnes, heavily. Paper to landfill carries one of
+the highest per-tonne factors (anaerobic CH4), while paper to recycling gets
+the near-zero processing-only factor under the recycled-content convention —
+so a small landfilled stream outweighs a much larger recycled one. Pull the
+current DESNZ factors to quantify.
 
-**Q2. Our WtE provider says our waste generated 55 MWh of electricity —
-can we subtract the avoided grid emissions?** No. Report category 5 using the
-combustion factor (200 t × 21.3 kgCO2e/t ≈ 4.3 tCO2e); the avoided ~20 tCO2e
-(55 MWh × grid factor) may be disclosed as a separate avoided-emissions memo
-line only, never netted (Scope 3 Standard, ch. 9).
+**Q2. Our WtE provider says our waste generated electricity — can we subtract
+the avoided grid emissions?** No. Report category 5 using the combustion
+factor (which grants no energy credit); the avoided grid emissions (recovered
+MWh × grid factor) may be disclosed as a separate avoided-emissions memo line
+only, never netted (Scope 3 Standard, ch. 9).
 
-**Q3. Spend-based screening: we spent $180,000 on waste services across US
-offices.** Assume $90/t blended disposal+haul cost (document; verify locally):
-180,000 ÷ 90 = 2,000 t. Assume 55% landfill / 45% diverted:
-1,100 t × 494 + 900 t × 21.3 ≈ 543.4 + 19.2 = **~563 tCO2e**. Screening grade
-only (tier 5) — flag for hauler-data upgrade if material.
+**Q3. Spend-based screening from waste-service spend — how?** Divide spend by
+a documented local disposal+haul cost ($/t) to estimate tonnes; split by an
+assumed landfill/diverted route mix; apply current mixed-waste route factors
+(Method 3). Screening grade only (tier 5) — flag for hauler-data upgrade if
+material, and document both the price and route-mix assumptions.
 
-**Q4. Our site discharges ~30,000 m³/yr to municipal sewer.** 30,000 m³ ×
-0.27 kgCO2e/m³ (DESNZ 2024 water treatment; verify) = 8,100 kgCO2e = **8.1
-tCO2e**. If only water supply (33,000 m³) is metered, apply a 0.9 discharge
-fraction and document it.
+**Q4. Our site discharges to municipal sewer with no effluent meter.** Use
+metered water supply × a documented discharge fraction (~0.9 for offices) as
+the volume, then multiply by the current DESNZ water-treatment factor.
+Industrial high-COD effluent instead needs IPCC COD-based CH4 estimation.
 
 **Q5. We operate our own on-site wastewater treatment plant — category 5?**
 No. Direct CH4/N2O from your own plant → **scope 1**; its electricity →
 scope 2. Only the residual sludge sent to a third party stays in category 5.
 
-**Q6. WARM gives −0.7 MTCO2e/short ton for recycling cardboard. Can I book a
+**Q6. WARM shows a negative net factor for recycling cardboard. Can I book a
 negative?** No. That is a net life-cycle factor including avoided virgin
 production. For your attributional inventory use collection/processing
 emissions only (recycled-content convention, near zero) and, optionally,

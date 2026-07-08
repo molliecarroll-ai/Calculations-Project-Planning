@@ -91,14 +91,11 @@ Emissions = Σ_fuels ( fuel consumed on reporter's behalf × EF_fuel )
 Reporter share = carrier total fuel × ( reporter t-km ÷ carrier total t-km )
 ```
 
-**Worked example:** A dedicated trucking contract consumed 180,000 L diesel
-for your freight.
-
-```
-TTW: 180,000 L × 2.51 kg CO2e/L = 451,800 kg = 452 t CO2e   # DEFRA 2024 diesel (avg blend) combustion — verify
-WTT: 180,000 L × 0.61 kg CO2e/L = 109,800 kg = 110 t CO2e   # DEFRA 2024 WTT — verify
-WTW total                        = 562 t CO2e  (state WTW basis)
-```
+**Method walk-through:** take the liters the carrier reports for your
+freight; multiply by the current-year combustion (TTW) factor and, if
+reporting WTW, separately by the current WTT factor for the same fuel
+(DEFRA fuel and WTT tables); sum and label the basis (TTW or WTW) on the
+result.
 
 **Pitfalls:** allocating by shipments instead of t-km biases against dense
 freight; refrigeration fuel/refrigerant leakage from reefer units is often a
@@ -134,23 +131,19 @@ EF_adjusted ≈ EF_vehicle-km ÷ (payload capacity × load factor × (1 − empt
 Never apply a full-truck assumption to LTL parcel freight — you'd understate
 several-fold.
 
-**Multimodal worked example:** 2,400 t of components: Shanghai→Rotterdam by
-container ship (19,500 km sea route), then Rotterdam→Frankfurt by HGV
-(580 km road).
+**Method walk-through (multimodal leg build):** decompose each shipment into
+legs by mode; for each leg, mass (t) × routed distance (km) × the current
+mode/vehicle-class factor (container ship size class for the sea leg,
+average-laden HGV class for the road leg), all on one TTW-or-WTW basis; sum
+the legs. Expect the short road leg to contribute a disproportionate share
+relative to its distance — road intensity per tonne-km runs roughly an order
+of magnitude above deep-sea shipping, which is why mode choice dominates
+freight footprints.
 
-```
-Sea:  2,400 t × 19,500 km × 0.016 kg CO2e/t-km = 748,800 kg  # container ship avg, DEFRA 2024 / GLEC v3 defaults, TTW ≈0.013–0.016; WTW slightly higher — verify
-Road: 2,400 t ×    580 km × 0.13  kg CO2e/t-km = 180,960 kg  # all-HGV avg laden, WTW (DEFRA 2024 ≈0.105 TTW + ≈0.026 WTT) — verify
-Total = 929,760 kg ≈ 930 t CO2e
-```
-
-Note the ratio: the 580 km road leg emits ~24% as much as the 19,500 km sea
-leg — mode choice dominates freight footprints.
-
-**Refrigerated transport:** apply the reefer uplift — DEFRA publishes
-refrigerated HGV/van factors ~**12–20% above ambient** for road (2024
-tables — verify) ; refrigerated container shipping uplifts can be larger
-(reefer power). Don't forget refrigerant leakage if using carrier fuel data.
+**Refrigerated transport:** use the dedicated refrigerated factors DEFRA
+publishes (moderately above the ambient factors) rather than applying an ad
+hoc uplift; refrigerated container shipping uplifts can be larger (reefer
+power). Don't forget refrigerant leakage if using carrier fuel data.
 
 **Warehousing / transshipment (logistics sites):**
 
@@ -167,9 +160,9 @@ run several times ambient intensity.
 
 **Pitfalls:** tonne-km built from *average* rather than actual shipment
 masses; double counting the road leg already inside an intermodal factor;
-using short-haul air factors for long-haul lanes (short-haul intensity is
-~2–3× long-haul); radiative forcing on air freight (DEFRA publishes with- and
-without-RF factors — with-RF roughly ~1.9× on CO2e; state your choice).
+using short-haul air factors for long-haul lanes (short-haul intensity runs
+roughly 2–3× long-haul); radiative forcing on air freight (DEFRA publishes
+with- and without-RF factors — with-RF is roughly double; state your choice).
 
 ### Method 3 — Spend-based
 
@@ -177,13 +170,10 @@ without-RF factors — with-RF roughly ~1.9× on CO2e; state your choice).
 Emissions = Σ_modes ( freight spend, deflated to factor $-year × EEIO EF_mode )
 ```
 
-**Worked example:** $2.0M (2025 USD) on truck freight; EPA Supply Chain
-Factors v1.3, truck transportation ≈ 0.8 kg CO2e/2022 USD (purchaser price —
-illustrative; verify). Deflator 2025→2022 = 1.09 (illustrative).
-
-```
-2,000,000 ÷ 1.09 × 0.8 kg/$ = 1,468,000 kg ≈ 1,468 t CO2e
-```
+**Method walk-through:** pull freight spend by mode from the GL/freight-audit
+data; deflate to the EEIO factor's dollar-year; multiply by the
+current-release EPA Supply Chain factor for the matching transport commodity
+(truck, air, water, courier); sum, documenting release and deflator.
 
 **Pitfalls:** freight rates swing with fuel surcharges and market cycles
 while physical flows don't — spend-based Category 4 is volatile and
@@ -191,29 +181,23 @@ non-steerable; parcel/express spend maps poorly to trucking factors (courier
 commodity differs); deduplicate freight already embedded in Category 1 goods
 prices.
 
-## Emission factors quick reference
+## Emission factor sources
 
-Representative WTW magnitudes per tonne-km — the mode hierarchy (air ≫ road ≫
-rail ≈ sea) matters more than decimals. Verify all against current DEFRA/GLEC
-publications.
+| Source | Governing table | Coverage | Units convention | Cadence |
+|---|---|---|---|---|
+| GLEC Framework / ISO 14083 | Default-data annex (mode and logistics-site intensities) | All freight modes + warehouses/terminals, global defaults | kg CO2e per t-km (WTW convention); per m³·day; per t handled | Periodic versions (v3.x) — verify current |
+| DEFRA/DESNZ UK GHG Conversion Factors | "Freighting goods" (+ WTT, refrigerated variants) | UK-average road/rail/sea/air, by vehicle class and laden assumption | kg CO2e per t-km; TTW and WTT published separately; air with/without RF | Annual |
+| EPA SmartWay | Carrier performance data files | US truck/rail/barge/logistics, carrier-specific | g CO2e per ton-mile (short ton); check TTW basis | Annual |
+| EPA Supply Chain GHG Emission Factors (USEEIO) | Transport commodity factors | US, spend-based | kg CO2e per USD of a stated dollar-year, purchaser price | Per USEEIO release |
+| IMO GHG studies / carrier ISO 14083 statements | Ship-type and carrier intensities | Deep-sea shipping; individual carriers | g CO2e per t-nm or t-km | Periodic |
 
-| Mode | ~kg CO2e/tonne-km (WTW) | Source & vintage |
-|---|---|---|
-| Air freight, long-haul intl (no RF) | ~0.6–0.8 | DEFRA 2024 freighting goods — verify; with RF ≈ ×1.9 |
-| Air freight, short-haul (no RF) | ~1.5–2.5 | DEFRA 2024 — verify |
-| Van/LGV (parcel-scale road) | ~0.5–0.7 | DEFRA 2024 — verify |
-| HGV, all types, average laden | ~0.11–0.13 | DEFRA 2024 (TTW ≈0.105 + WTT ≈0.026) — verify |
-| HGV, articulated >33t, avg laden | ~0.08–0.10 | DEFRA 2024 — verify |
-| Refrigerated HGV | ambient × ~1.12–1.20 | DEFRA 2024 refrigerated tables — verify |
-| Rail freight | ~0.03 | DEFRA 2024 / GLEC v3 — verify |
-| Inland waterway/barge | ~0.03–0.05 | GLEC v3 defaults — verify |
-| Container ship (deep sea) | ~0.015–0.02 | DEFRA 2024 / GLEC v3 (size-class dependent) — verify |
-| Bulk carrier (dry bulk) | ~0.004–0.01 | GLEC v3 / IMO — verify |
-| Truck transportation (spend) | ~0.7–0.9 kg CO2e/2022 USD | EPA Supply Chain Factors v1.3 — verify |
-| Air transportation (spend) | ~0.9–1.2 kg CO2e/2022 USD | EPA SEF v1.3 — verify |
+**Mode hierarchy (methodology, keep this even without numbers):** per
+tonne-km, air freight ≫ road ≫ rail ≈ sea — air vs deep-sea is roughly two
+orders of magnitude. A single air-vs-sea mode decision usually outweighs
+every factor-precision question.
 
-Rule of thumb: air ≈ 30–50× sea, ≈ 5–8× road per tonne-km; a single air-vs-sea
-mode decision usually outweighs every factor-precision question.
+This skill intentionally quotes no factor values. When a quantitative answer
+is needed, pull the current-year value from the named source.
 
 ## Unit and conversion traps
 
@@ -227,9 +211,9 @@ mode decision usually outweighs every factor-precision question.
   actual weight** (volumetric billing weight overstates mass for light goods).
 - **Great-circle vs routed distance:** apply GLEC distance-adjustment
   conventions; sea distances come from port-pair tables, not straight lines.
-- **Radiative forcing on air:** with-RF vs without-RF is roughly a factor
-  ~1.9 on air CO2e (DEFRA) — disclose the choice and keep it consistent with
-  Category 6.
+- **Radiative forcing on air:** with-RF air factors are roughly double the
+  without-RF values (DEFRA convention — verify current) — disclose the choice
+  and keep it consistent with Category 6.
 - **Intermodal double counts:** a "door-to-door intermodal" carrier factor
   already includes drayage — don't add separate road legs on top.
 
@@ -260,8 +244,9 @@ mode decision usually outweighs every factor-precision question.
 
 - **Share reasonableness:** Category 4 is commonly ~5–15% of scope 3 for
   manufacturers/retailers; air-freight-heavy businesses (fashion, pharma,
-  electronics) run far higher. An implied network intensity outside
-  ~0.01–0.6 kg CO2e/t-km should trace to mode mix or an error.
+  electronics) run far higher. The implied network intensity (kg CO2e/t-km)
+  should sit between the current published sea and air factors and be
+  explainable by the mode mix.
 - **Coverage vs P&L:** freight + logistics spend put through methods
   reconciles to freight expense lines; TMS shipment count vs goods-receipt
   count catches missing flows.
@@ -277,40 +262,44 @@ mode decision usually outweighs every factor-precision question.
 
 ## Worked FAQ
 
-**Q1. 15 t of goods air-freighted Hong Kong→Los Angeles (11,650 km).**
-15 t × 11,650 km × 0.65 kg CO2e/t-km (long-haul intl air, no RF, DEFRA
-2024 — verify) = **113.6 t CO2e** (≈216 t with RF at ~1.9×). Note the same
-mass by container ship (~0.016) would be ~2.8 t CO2e — 40× less.
+**Q1. How do we handle goods air-freighted Hong Kong→Los Angeles?**
+Distance-based: mass (t) × routed distance (great-circle plus the GLEC
+distance adjustment) × the current long-haul international air factor,
+stating the RF choice. Note for prioritization: the same mass by container
+ship would come out roughly two orders of magnitude lower — the mode
+decision, not factor precision, is what matters on this lane.
 
 **Q2. Customer picks up goods from our dock and pays a carrier. Cat 4 or 9?**
 Category 9 for you (downstream party pays). If you had paid that same carrier,
 it would be your Category 4. Apply the who-pays test across the whole
 shipment population, not lane by lane ad hoc.
 
-**Q3. 3PL warehouse stores our goods: our share is 5,000 pallet-positions,
-provider allocates us 220,000 kWh electricity + 8,000 L propane forklift fuel.**
-Electricity: 220,000 kWh × 0.373 kg CO2e/kWh (eGRID 2022 US avg — use
-subregion, verify) = 82.1 t. Propane: 8,000 L × 1.54 kg CO2e/L (EPA Hub
-2024 — verify) = 12.3 t. **≈94 t CO2e in Category 4** (energy-based site
-method).
+**Q3. A 3PL warehouse allocates us electricity and forklift fuel for our
+share of pallet positions. How do we book it?**
+Energy-based site method, in Category 4: allocated kWh × the site's grid
+factor (eGRID subregion or national equivalent, current release) plus
+allocated fuel × the current combustion factor. This outranks GLEC site
+defaults on the ladder because it uses the provider's actual energy.
 
-**Q4. Our LTL shipments: 3,800 shipments, avg 450 kg, avg 720 km by road.**
-3,800 × 0.45 t × 720 km = 1,231,200 t-km × 0.13 kg CO2e/t-km (all-HGV avg
-laden WTW, DEFRA 2024 — verify) = **160 t CO2e**. Don't use an articulated-
-full-load factor for LTL; average-laden all-HGV or a parcel-network factor is
-appropriate.
+**Q4. Our LTL shipments: thousands of small consignments, average mass and
+distance known. Which factor class?**
+Build t-km from shipment count × average mass × average distance (better:
+actual per-shipment masses), then apply an average-laden all-HGV or
+parcel-network factor. Never use an articulated-full-load factor for LTL —
+default factors must match the network's real utilization.
 
-**Q5. Refrigerated distribution of 900 t over avg 350 km (chilled).**
-900 t × 350 km = 315,000 t-km × (0.13 × 1.15 uplift) ≈ 0.15 kg CO2e/t-km
-(DEFRA 2024 refrigerated HGV — verify exact factor rather than applying an
-uplift when the published refrigerated factor exists) = **47 t CO2e**.
+**Q5. Refrigerated distribution — uplift the ambient factor?**
+No — use the published refrigerated HGV factor from the current DEFRA tables
+directly rather than applying your own uplift to the ambient factor. If
+working from carrier fuel data instead, add the reefer fuel line and
+refrigerant leakage.
 
-**Q6. Our carrier gave us a SmartWay figure: 78 g CO2e/ton-mile for our
-lanes, 2.1M ton-miles. Convert and compute.**
-78 g/ton-mile × 1.459 = 113.8 g CO2e/t-km; 2.1M ton-miles ÷ 0.685 = 3.066M
-t-km. Either path: 2,100,000 × 78 g = **163.8 t CO2e** (SmartWay data is
-carrier-specific TTW+ conventions — check its basis before mixing with WTW
-lines).
+**Q6. Our carrier gave us a SmartWay g/ton-mile intensity and our ton-miles.
+How do we use it?**
+Either convert the intensity to metric (1 g/ton-mile = 1.459 g/t-km) and
+multiply by t-km (ton-miles ÷ 0.685), or keep everything in short-ton-miles —
+never mix the systems. Also check the SmartWay figure's basis (carrier
+TTW-plus conventions) before summing with WTW lines.
 
 ## References
 
