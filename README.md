@@ -17,8 +17,8 @@ Prioritize Persefoni platform calculation improvements so that we (1) use engine
 |---|------|-----------|---------------|---------------|----------------|
 | 1 | Spend-based waste | 85% | ~1 mo | July 2026 | Front end in dev/test; ships within weeks |
 | 2 | eGRID subregion assignment | 70% | ~1.5 mo | Jul–Aug 2026 | Snowflake/DevOps pipeline pieces remain (Evan confirming with Vinh); can run concurrently with simplified electricity |
-| 3 | Simplified electricity | 60% | ~4 mo total | End of July, Aug at latest | **Top priority.** Core components built; remaining: product guidance, final dev, testing |
-| 4 | Simplified combustion | 50% | 2–3 mo ⚠️ | Sep–Nov 2026 | ⚠️ Sync said 2 months, Gantt says 3 — reconcile at next sync |
+| 3 | Simplified electricity | 60% | 2 mo remaining (Jul–Aug) | **Hard commitment: end of August 2026** | **Top priority.** Core components built; remaining: product guidance, final dev, testing |
+| 4 | Simplified combustion | 50% | 2–3 mo ⚠️ | Sep–Nov 2026 | ⚠️ Sync said 2 months, Gantt says 3 — plan to the 3-month window until reconciled |
 | 5 | Expanded refrigerant list / non-Kyoto reporting | 25% | ~2 mo | Oct–Nov 2026 | Builds on biogenic work, simpler (no activity/energy data, no density conversions). **Requirements not yet written** |
 | 6 | DEFRA telework | 20% | ~1 mo | September 2026 | Evan re-reviewing PRD; sequenced after simplified electricity |
 | 7 | In-platform gap filling | 0% | ~5 mo | Sep–Nov 2026 (code start ~Sep due to August outages) | **Hard commitment: Liberty Mutual end-of-year inventory.** Needs requirements session (Suhayl & Tai, set for Jul 7) to reconcile AI-built-tool learnings vs. original PRD and split calcs vs. advanced workstreams |
@@ -34,7 +34,7 @@ Score each candidate item 1–5 on six criteria. Weighted total drives rank orde
 |-----------|--------|------------------|----------------------|
 | **Customer commitment / deadline pressure** | 25% | Contractual or promised dates (e.g., Liberty Mutual EOY inventory) | No commitments → hard dated commitment at risk |
 | **Breadth of customer demand** | 20% | How many accounts need it, and pipeline/renewal exposure | 1 account, nice-to-have → 3+ accounts or renewal-blocking (e.g., Cat 11 surfaced at 3 accounts in one week) |
-| **CS time saved / workaround cost** | 20% | Hours/month CS spends on manual or Excel workarounds this would eliminate | Rare, quick workaround → recurring, error-prone, multi-hour workaround every inventory cycle |
+| **CS time saved / workaround cost** | 20% | Hours/month CS spends on manual or Excel workarounds this would eliminate. *No formal time tracking will be introduced (decided Jul 2026) — Erin scores this at intake as a structured estimate from her customer/platform knowledge* | Rare, quick workaround → recurring, error-prone, multi-hour workaround every inventory cycle |
 | **Effort & readiness (inverse)** | 15% | Remaining engineering effort and how close it is to done | Large build, 0% started → small remaining effort, mostly done (rewards finishing in-flight work) |
 | **Strategic / methodology leverage** | 10% | Reuses or unlocks other calc work (e.g., refrigerants building on biogenic) | One-off → foundation for multiple future calcs |
 | **Accuracy & compliance risk** | 10% | Does the current gap create audit/assurance or data-quality exposure? | Cosmetic → material misstatement risk |
@@ -65,6 +65,7 @@ Score each candidate item 1–5 on six criteria. Weighted total drives rank orde
 - **Mollie closes the requirements gate.** Since PRDs are the standing bottleneck (refrigerants, Cat 11, gap filling), requirements drafting is Mollie's lane, with Erin contributing methodology/customer input in bounded sessions and Evan reviewing for build feasibility.
 - **Pairing is a scarce resource.** A pairing day consumes most of Erin's weekly allocation, so pair only in **scheduled, bounded sessions**: requirements workshops (gap filling, Cat 11), methodology sign-offs, and go/no-go reviews before ship. Day-to-day build support is solo (Evan) by default.
 - **Continuity risk:** Evan is a single point of failure for the whole practice area. Mitigations: Erin reviews everything (so context is never single-homed), and every item must leave behind a written PRD + methodology note + test evidence — no tribal-knowledge ships.
+- **Engineering capacity (confirmed Jul 2026):** two engineers — **Vinh and Huyen — directed by Evan.** Eng headcount supports ~2 concurrent workstreams, but the binding constraint is Evan's direction bandwidth, which comes out of his same 0.8 FTE. A second concurrent build is only realistic when it needs minimal day-to-day direction (well-specified PRD, engineer has done similar work before).
 - **Team-wide concurrency:** effectively **one major build at a time** on the support side, with a second item allowed only if its support burden is light (eng-heavy items where CS involvement is review/testing only).
 - **Pipeline stages:** Intake → Scoping/Requirements → Build support → Test/validate → Ship & enable (docs, KB, CS training) → Post-ship check (did it actually reduce CS workaround time?).
 
@@ -73,7 +74,7 @@ Score each candidate item 1–5 on six criteria. Weighted total drives rank orde
 ## 4. Phased Long-Term Plan
 
 ### Phase 1 — Ship the in-flight work (July–August 2026)
-- **Ship:** spend-based waste (July), eGRID subregion assignment (Jul–Aug), simplified electricity (end of July, Aug at latest — top priority).
+- **Ship:** spend-based waste (July), eGRID subregion assignment (Jul–Aug), simplified electricity (**hard commitment: end of August** — top priority; 2-month remaining window, Jul–Aug).
 - **Requirements:** hold the Jul 7 gap-filling session (Suhayl & Tai); update the PRD and split calcs vs. advanced workstreams. Draft refrigerant/non-Kyoto requirements so it can start on time in October.
 - **Cat 11 scoping track (parallel, low intensity):** collect AGCO and Tenneco methodology/sample data; untangle Daimler's region-varying efficiency values; Mollie joins Daimler discussions with Ben & Caroline.
 - **Constraint:** August outages — plan no new code starts in August; use the time for requirements, testing, and validation.
@@ -102,12 +103,31 @@ With ~0.8 FTE of plannable support capacity (Evan) + Erin's review hours, the fo
 
 ---
 
-## 5. Open Questions (for internal discussion)
+## 5. First-Pass Scoring (strawman — validate at next Mollie/Evan/Erin sync)
+
+Provisional scores against the §2 rubric. **Demand and CS-time columns are Mollie/Claude estimates and are Erin's to correct**; readiness scores come from the Gantt % complete. Weighted total = Commitment×0.25 + Demand×0.20 + CS time×0.20 + Readiness×0.15 + Leverage×0.10 + Risk×0.10.
+
+| Rank | Item | Commit (25%) | Demand (20%) | CS time (20%) | Readiness (15%) | Leverage (10%) | Risk (10%) | **Score** | Gates |
+|------|------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|-------|
+| 1 (tie) | Simplified electricity | 5 | 5 | 4 | 4 | 4 | 3 | **4.35** | ✅ Pass |
+| 1 (tie) | In-platform gap filling | 5 | 5 | 5 | 2 | 4 | 4 | **4.35** | ⚠️ Requirements gate pending Jul 7 session |
+| 3 | eGRID subregion | 2 | 4 | 3 | 4 | 3 | 4 | **3.20** | ✅ Pass |
+| 4 | Simplified combustion | 2 | 4 | 4 | 3 | 3 | 3 | **3.15** | ✅ Pass |
+| 5 | Spend-based waste | 2 | 3 | 3 | 5 | 2 | 3 | **2.95** | ✅ Pass (nearly shipped) |
+| 6 | Category 11 | 2 | 4 | 4 | 1 | 3 | 3 | **2.85** | ❌ Fails requirements gate — scoping track only |
+| 7 | Refrigerants / non-Kyoto | 2 | 3 | 3 | 2 | 4 | 4 | **2.80** | ❌ Fails requirements gate until PRD written |
+| 8 | DEFRA telework | 2 | 3 | 3 | 3 | 2 | 2 | **2.55** | ✅ Pass (pending Evan's PRD re-review) |
+
+**How to read this vs. the schedule:** the score ranks *value*, but sequencing also considers *size and fit*. DEFRA scores last yet is scheduled early because a 1-month item slots into the gap between electricity shipping and gap-filling code start — small items are allowed to jump when they fill otherwise-dead capacity without delaying anything above them. Category 11's decent demand score is exactly why its scoping track runs now: passing the requirements gate is what would let its real score compete for a Q1 slot.
+
+---
+
+## 6. Open Questions (for internal discussion)
 
 1. ~~**Capacity reality**~~ — **Answered (Jul 2026):** Evan 100% dedicated with ~20% reactive (≈0.8 FTE plannable); Erin ~15% (≈6 hrs/wk). §3 and Phase 2 updated accordingly.
 2. ~~**Skills split**~~ — **Answered (Jul 2026):** Evan = calc engineering/testing/QA; Erin = customer needs/platform use/methodologies; Mollie = methodologies/technical requirements. Skills map added to §3. Residual risk: no one besides Evan covers engineering/QA — written test evidence per item is the mitigation.
-3. **Other dated commitments:** Liberty Mutual EOY is the only hard date captured. Are there other contractual or promised dates (Daimler? renewals tied to Cat 11?) that should raise an item's commitment score?
-4. **Workaround cost data:** Do we have (or can we start tracking) CS hours spent per calc-area workaround? That evidence makes the 20% "CS time saved" criterion objective instead of anecdotal, and it's the best story for justifying eng investment.
-5. **Engineering capacity:** Who commits eng bandwidth on the product side (Vinh's team?), and how many concurrent builds can they actually support? The plan assumes ~2 concurrent.
-6. **Tooling:** Keep the Gantt sheet as the source of truth, or move item tracking to Jira/Confluence with the sheet as the executive view?
-7. **Estimate discrepancy:** Simplified combustion — 2 months (sync notes) vs. 3 months (Gantt). Which is right?
+3. ~~**Other dated commitments**~~ — **Answered (Jul 2026):** two hard dates — **simplified electricity by end of August** and **in-platform gap filling by end of year** (Liberty Mutual). Everything else is directional. Inventory and Phase 1 updated.
+4. ~~**Workaround cost data**~~ — **Answered (Jul 2026):** no separate time-tracking mechanism will be introduced. The "CS time saved" criterion is scored at intake as a structured estimate by Erin (§2 note).
+5. ~~**Engineering capacity**~~ — **Answered (Jul 2026):** Evan directs Vinh and Huyen. Two engineers ≈ two concurrent workstreams max, but Evan's direction bandwidth is the binding constraint (§3).
+6. ~~**Tooling**~~ — **Answered (Jul 2026):** stay in the Gantt sheet for now; revisit at the first quarterly re-prioritization.
+7. **Estimate discrepancy (still open):** Simplified *combustion* — 2 months (sync notes) vs. 3 months (Gantt). Planning to the conservative 3-month window until Evan confirms. (Simplified *electricity* was separately confirmed at 2 months remaining, Jul–Aug.)
