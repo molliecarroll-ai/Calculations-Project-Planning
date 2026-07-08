@@ -71,20 +71,20 @@ C14 = Σ_locations [ Σ_fuels (fuel qty × fuel EF)
                     + refrigerant losses × GWP ]
 ```
 
-**Worked example.** A QSR franchisor gets data from 1,200 of 5,000
-locations: average per location 310,000 kWh electricity + 2,600 therms gas;
-US grid 0.37 kgCO2e/kWh (eGRID 2023 — verify; use subregions when locations
-are geocoded), gas 5.31 kgCO2e/therm (EPA Hub 2025 — verify).
+**Method walk-through.** Symbolic:
 
 ```text
-Per location: 310,000 × 0.37 = 114,700 kg  +  2,600 × 5.31 = 13,806 kg
-            = 128,506 kg ≈ 128.5 tCO2e
-Covered 1,200 locations: 154,200 tCO2e
+1. Covered locations: kWh and therms per location   ← franchisee-supplied
+   utility data (agreement data clauses, brand sustainability portal,
+   utility-data aggregators), pro-rated to the reporting year
+2. Grid EF per location   ← eGRID subregion where geocoded / national factor
+3. Gas EF                 ← EPA Hub current edition (per therm, HHV)
+4. Covered C14 = Σ_locations (kWh × grid EF + therms × gas EF
+                 + refrigerant losses × GWP)
+5. Uncovered tail: extrapolate covered per-location averages stratified by
+   store format × climate zone, flagged as estimated
+6. System C14 = covered + extrapolated; disclose the coverage split
 ```
-
-The remaining 3,800 locations are gap-filled with the covered-fleet average
-(see method 2 / gap-filling): `3,800 × 128.5 = 488,300 t`, flagged
-estimated. System C14 ≈ **642,500 tCO2e**.
 
 **Pitfalls:** self-selected reporters are often the larger/newer (or
 greener) stores — stratify the extrapolation by store format and climate,
@@ -109,15 +109,11 @@ intensities (EIA — verify current cycle); brand engineering data (design
 energy models per store format are often better than CBECS); hotel sector
 benchmarks (CHSB — Cornell Hotel Sustainability Benchmarking).
 
-**Worked example.** Hotel franchisor: 400 franchised hotels, 60,000 ft²
-average = 24,000,000 ft². CHSB/CBECS lodging ≈ 14 kWh/ft² electricity +
-0.035 MMBtu/ft² gas (illustrative — verify):
-
-```text
-Electricity: 24e6 × 14 kWh/ft² × 0.37 kg/kWh = 124,320,000 kg ≈ 124,320 tCO2e
-Gas:         24e6 × 0.035 × 53.4 kg/MMBtu    =  44,856,000 kg ≈  44,856 tCO2e
-C14 ≈ 169,200 tCO2e
-```
+**Application note.** Take total franchised floor area by format from the
+location master list, multiply by the current CBECS/CHSB intensity (or
+brand engineering design-energy models — often better than generic
+benchmarks) fuel by fuel, then by the location-appropriate EFs (subregional
+grid factors where geocoded; gas EF from the current EPA Hub).
 
 **Pitfalls:** store-format mix (a drive-thru QSR ≠ food court kiosk);
 climate weighting for heating/cooling-dominated formats; counting
@@ -134,19 +130,23 @@ sector factors (USEEIO — verify version). Use to size the category before
 investing in data programs; score 5 on data quality; do not carry into a
 mature inventory.
 
-## Emission factors / parameters quick reference
+## Emission factor and parameter sources
 
-Verify all against the named current source; record source/year/units.
+Record source, edition/vintage, and units for every input per the
+`ghg-protocol` skill §7.
 
-| Parameter | Value | Units | Source + vintage |
-|---|---|---|---|
-| Food service building intensity | ~250+ total site (elec. ~45 kWh/ft²) | kBtu/ft²·yr; kWh/ft²·yr | CBECS 2018 (EIA) — highest-intensity commercial type |
-| Retail (non-mall) intensity | ~50–55 | kBtu/ft²·yr | CBECS 2018 |
-| Lodging intensity | ~70–80 | kBtu/ft²·yr | CBECS 2018 / CHSB (annual) |
-| US grid average | ~0.37 | kgCO2e/kWh | eGRID 2023 data (pub. 2025); prefer subregion |
-| Natural gas | 5.31 /therm; 53.06 /MMBtu | kgCO2 | EPA GHG EF Hub, 2025 ed. (HHV) |
-| Motor gasoline / diesel | 2.32 / 2.70 per L | kgCO2 | EPA Hub 2025 |
-| Commercial refrigeration leak rate | ~10–35 %/yr of charge | % of charge | IPCC 2006 GL vol. 3 ch. 7; EPA GreenChill (verify) |
+| Source | Governing table / dataset | Coverage | Units convention | Cadence |
+|---|---|---|---|---|
+| EIA CBECS | Food-service, retail, and lodging intensity tables, by fuel (food service is the highest-intensity commercial type) | US commercial buildings | kBtu/ft²·yr (total/gas); kWh/ft²·yr (electricity); whole-building basis | Survey cycles (verify the current cycle) |
+| Cornell Hotel Sustainability Benchmarking (CHSB) | Hotel energy/carbon benchmarks | Global lodging, by segment and climate | per room / per ft² | Annual |
+| EPA eGRID | Subregion output emission rates | US grid | per MWh (convert to kWh) | Biennial data releases |
+| EPA GHG EF Hub | Natural gas (therm/MMBtu, HHV) and vehicle-fuel tables | US fuels | per therm / MMBtu / gallon | Annual |
+| IPCC 2006 GL vol. 3 ch. 7; EPA GreenChill | Commercial-refrigeration leak-rate defaults | Refrigerant losses | % of charge per yr | Static / periodic |
+| IPCC assessment report (declared AR set) | GWP tables (blend-weighted for commercial blends) | Refrigerants | 100-yr GWP | Per assessment cycle |
+| USEEIO | Restaurant/accommodation sector intensities | Revenue-proxy screening | per $ revenue | Versioned |
+
+This skill intentionally quotes no factor values. When a quantitative
+answer is needed, pull the current-year value from the named source.
 
 ## Unit and conversion traps
 

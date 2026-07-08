@@ -194,11 +194,13 @@ supply); category 13 then excludes it. The alternative (tenant-share carved
 into 13) is defensible where tenants control usage — choose one convention,
 apply portfolio-wide, disclose. Never both.
 
-**Q3. Equipment maker leasing 4,000 diesel generators (avg 900 operating
-h/yr, 15 L/h). C13?**
-`4,000 × 900 h × 15 L/h × 2.72 kgCO2e/L = 146,880 t ≈ 147,000 tCO2e/yr`.
-Annual basis while leased; if a unit is later sold used, shift to your
-category 11 policy for the remaining life and disclose.
+**Q3. Equipment maker leasing out diesel generators. C13?**
+Yes — asset-specific method: units × operating hours × fuel rate (from
+telematics or fuel-card data; engineering duty-cycle assumptions if not
+available, disclosed) × the diesel EF from the current EPA Hub / DESNZ
+edition, on an annual lease-period basis while leased. If a unit is later
+sold used, shift to your category 11 policy for the remaining life and
+disclose.
 
 **Q4. Our JV owns a leased-out mall; we hold 30% equity, no control,
 financial-control boundary. Where does it go?**
