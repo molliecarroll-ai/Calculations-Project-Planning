@@ -404,7 +404,7 @@ category 10 either way.
 × 15 yr + 30% EOL release of remainder; 3,500 kWh/yr electricity × 15 yr,
 EU grid 0.23 kgCO2e/kWh.**
 Refrigerant: release = 45% + 0.30×55% = 61.5%;
-`60,000 × 1.1 × 0.615 × 677 / 1,000 = 27,470 tCO2e`.
+`60,000 × 1.1 × 0.615 × 677 / 1,000 = 27,480 tCO2e`.
 Energy: `60,000 × 3,500 × 15 × 0.23 / 1,000 = 724,500 tCO2e`.
 Total ≈ **752,000 tCO2e** — energy dominates; both mechanisms required.
 Optional refinement: declining EU grid trajectory would cut the energy term
