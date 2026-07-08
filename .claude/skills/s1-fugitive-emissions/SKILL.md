@@ -117,14 +117,13 @@ disbursements off-site (kg); C = sum of equipment nameplate charges (kg). The
 capacity term removes refrigerant that went into (or came out of) equipment
 rather than the atmosphere.
 
-**Sign conventions that trip people up:** a storage-inventory decrease and net
-acquisitions both add to emissions. Fleet **growth** (C_end > C_begin) makes
-the capacity term subtract — that refrigerant went into equipment, not the
-air. Fleet **shrinkage** from retirements makes the capacity term negative,
-which adds the retired charge into the balance; any of it that was actually
-recovered then nets back out through I_end (recovered into your cylinders) or
-D (sent off-site). Convert the resulting kg, per refrigerant, with the
-mass-weighted blend GWP from the inventory's declared AR set.
+**Sign conventions that trip people up:** inventory decrease and net
+acquisitions both add to emissions. Fleet **growth** makes the capacity term
+subtract (that refrigerant went into equipment, not the air); fleet
+**shrinkage** from retirements makes it negative, adding the retired charge
+into the balance — recovered gas then nets back out through I_end or D.
+Convert the resulting kg, per refrigerant, with the mass-weighted blend GWP
+from the declared AR set.
 
 **Pitfalls:** omitting the capacity term (overstates emissions in growth
 years, produces negative results in retirement years); counting refrigerant
@@ -153,9 +152,8 @@ f_recovered: fraction of retired-unit charge actually recovered (from
 ```
 
 **Walk-through** — a service-only year (no installs or retirements) reduces
-to E_kg = P_service per refrigerant; convert with the blend GWP from the
-declared AR set. The whole method turns on the purpose split of purchases —
-see pitfalls.
+to E_kg = P_service per refrigerant; convert with the blend GWP. The whole
+method turns on the purpose split of purchases — see pitfalls.
 
 **Pitfalls:** purchases that charged **new** equipment must be excluded from
 the top-up term (only the installation-loss fraction of those kg is emitted);
@@ -193,8 +191,8 @@ regime; document the choice. Midpoint is a defensible default for screening.
 
 **Walk-through**: per refrigerant, E_kg = installed charge × the selected,
 documented leak rate; convert with the blend GWP from the declared AR set.
-For high-leak categories (e.g., supermarket racks, where the default range
-spans 10–35%/yr) the selected rate is the dominant uncertainty — disclose it.
+For high-leak categories (e.g., supermarket racks) the selected rate is the
+dominant uncertainty — disclose it.
 
 **SF6 in switchgear** (same tier structure): nameplate SF6 capacity × annual
 leak rate. Defaults: sealed-pressure MV switchgear ≈ 0.1–0.5%/yr
@@ -253,25 +251,21 @@ the non-Kyoto mass to the memo item.
 ## Emission factor sources
 
 For fugitive sources the "factors" are GWPs (fixed per IPCC assessment-report
-edition) and method-defining default parameters (leak-rate and loss ranges) —
-not annually revised emission factors:
+edition) and method-defining default parameters — not annually revised
+emission factors:
 
-- **GWPs**: IPCC AR5 WG1 (2013) Appendix 8.A; IPCC AR6 WG1 (2021) ch. 7
-  supplementary tables. The EPA GHG Emission Factors Hub GWP table
-  (Part 98 Table A-1-aligned) republishes them. Static per AR edition — use
-  the inventory's declared set.
-- **Blend compositions**: ASHRAE Standard 34 designations (mass fractions).
+- **GWPs**: IPCC AR5 WG1 (2013) Appendix 8.A; AR6 WG1 (2021) ch. 7
+  supplementary tables; republished in the EPA Hub GWP table (Part 98
+  Table A-1-aligned). Static per AR edition — use the declared set.
+- **Blend compositions**: ASHRAE Standard 34 (mass fractions).
 - **Default leak/loss rates**: GHG Protocol HFC tool, adopting IPCC 2006 GL
-  vol. 3 ch. 7 Table 7.9 (2006 vintage; check the 2019 Refinement).
-- **SF6 leak defaults**: IPCC 2006 GL vol. 3 ch. 8; EPA SF6 Emission
-  Reduction Partnership fleet statistics; 40 CFR Part 98 subpart DD
-  (mass-balance prescription).
-- **Fire suppression default release rate**: IPCC 2006 GL vol. 3 ch. 7.4.
+  vol. 3 ch. 7 Table 7.9 (2006 vintage; check the 2019 Refinement). SF6:
+  IPCC 2006 ch. 8, EPA SF6 Partnership statistics, Part 98 subpart DD.
+  Fire suppression: IPCC 2006 ch. 7.4.
 
-**100-year GWPs of common refrigerants and agents** (IPCC AR5 2013 values
-without climate-carbon feedback; IPCC AR6 2021. Retained here because they
-are fixed by the named AR edition; verify your disclosure program's required
-GWP set):
+**100-year GWPs of common refrigerants and agents** (IPCC AR5 2013 without
+climate-carbon feedback; AR6 2021. Retained because fixed per AR edition;
+verify your disclosure program's required set):
 
 | Substance | AR5 GWP-100 | AR6 GWP-100 | Notes |
 |---|---|---|---|
@@ -290,16 +284,13 @@ GWP set):
 | R-1234yf (HFO) | <1 | ~0.5 | **Non-Kyoto — memo item only** |
 | FK-5-1-12 (Novec 1230) | <1 | <1 | Fire suppression; effectively nil |
 
-**Default leak rates**: see the Tier 3 table above (GHG Protocol HFC tool /
-IPCC 2006 Table 7.9, 2006 vintage). **SF6**: 0.1–0.5%/yr sealed, 0.5–2.6%/yr
-closed-pressure (IPCC 2006 ch. 8). **Fire suppression**: ~2%/yr of installed
-base (IPCC 2006 ch. 7.4). All defaults carry wide ranges — always state the
-value chosen and verify the current publication before relying on any range.
+Default leak/loss-rate ranges live in the Tier 3 section above; all carry
+wide ranges — state the value chosen and verify the current publication.
 
 This skill intentionally quotes no factor values. When a quantitative answer
 is needed, pull the current-year value from the named source. (The GWPs and
-default parameter ranges above are retained deliberately: they are fixed by
-the named publication edition and define the methods.)
+default parameter ranges above are retained: they are fixed by the named
+publication edition and define the methods.)
 
 ## Unit and conversion traps
 

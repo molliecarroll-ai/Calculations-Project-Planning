@@ -175,14 +175,15 @@ answer is needed, pull the current-year value from the named source.
 
 ## Worked FAQ
 
-**Q1. 5,000-location QSR system, zero franchisee data. First-pass C14?**
-Average format 2,800 ft², food-service intensities (CBECS 2018 — verify):
-electricity `5,000 × 2,800 × 45 kWh/ft² × 0.37 = 233,100 t`; gas `5,000 ×
-2,800 × 0.10 MMBtu/ft² × 53.4 = 74,760 t`; refrigerant `5,000 × 120 kg
-charge × 15% × 3,943 (R-404A, AR5) /1000 = 354,870 t`... note refrigerant
-rivals energy for refrigeration-heavy formats — verify charge/leak with
-engineering. Order-of-magnitude C14 ≈ **660,000 tCO2e**; prioritize a data
-program.
+**Q1. Large QSR system, zero franchisee data. First-pass C14?**
+Average-data method: system floor area by format (location master list ×
+format-average area) × current CBECS food-service intensities, fuel by
+fuel, × location-appropriate EFs — plus a refrigerant term: per-location
+charge (brand-standard equipment specs) × leak rate (IPCC 2006 GL vol. 3
+ch. 7 / EPA GreenChill) × blend-weighted GWP. For refrigeration-heavy
+formats the refrigerant term can rival building energy — verify charge and
+leak assumptions with engineering before trusting the screen, then
+prioritize a franchisee data program.
 
 **Q2. We own 20% of locations and franchise 80%. Split?**
 Owned/operated 20% → scopes 1/2 (operational control). Franchised 80% →
