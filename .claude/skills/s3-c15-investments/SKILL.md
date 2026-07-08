@@ -118,13 +118,17 @@ EVIC = Enterprise Value Including Cash
      (cash NOT deducted — that is the difference from classic enterprise value)
 ```
 
-**Worked example.** You hold a $10,000,000 corporate bond of an issuer with
-market cap $1.5B, total debt $0.45B, minority interest $0.05B → EVIC = $2.0B.
-Issuer reports verified S1+S2 of 500,000 tCO2e (CDP, assured — score 1).
+**Method walk-through.** Symbolic, per instrument:
 
 ```text
-Attribution = 10,000,000 / 2,000,000,000 = 0.005 (0.5%)
-Financed emissions = 0.005 × 500,000 tCO2e = 2,500 tCO2e   (DQ score 1)
+1. Outstanding amount at the measurement date   ← portfolio ledger
+2. EVIC components (market cap, total debt, minority interest)
+       ← issuer financials / data vendors (Bloomberg, FactSet),
+         fiscal-year-aligned with the emissions year
+3. Investee S1+S2   ← CDP response or assured report (score 1);
+                      unverified report (score 2)
+4. Financed emissions = (outstanding ÷ EVIC) × investee S1+S2
+5. C15 contribution = Σ instruments; record the DQ score per record
 ```
 
 **When investee data is unavailable** — the score-4 EEIO fallback:
@@ -157,16 +161,13 @@ Attribution = outstanding loan or equity stake
 
 Outstanding = drawn amounts only (undrawn commitments excluded under PCAF).
 
-**Worked example.** $25M drawn term loan to a private cement producer with
-balance-sheet equity $60M and total debt $140M (denominator $200M). No
-reported emissions; production data available: 800,000 t clinker ×
-0.85 tCO2/t clinker (GNR/GCCA sector data — verify) ≈ 680,000 tCO2e S1, plus
-S2 est. 45,000 tCO2e → score 3 (physical-activity-based).
-
-```text
-Attribution = 25,000,000 / 200,000,000 = 0.125
-Financed emissions = 0.125 × 725,000 = 90,625 tCO2e   (DQ score 3)
-```
+**Method walk-through.** Attribution = drawn outstanding ÷ (borrower book
+equity + total debt), both from the borrower's financial statements for the
+same fiscal year as the emissions. Where the borrower reports no emissions,
+estimate from primary production data × a sector production intensity
+(e.g., GCCA GNR for cement, worldsteel for steel — current year) plus an S2
+estimate from energy data → score 3 (physical-activity-based). Multiply and
+sum across the book.
 
 **Pitfalls:** negative equity → denominator can go ≤ 0 or attribution > 100%;
 PCAF guidance: cap attribution at 100% and disclose. Revolvers: drawn
@@ -186,11 +187,13 @@ close for new projects, report **total projected lifetime emissions**
 separately — e.g., a financed gas plant's 25-year output — not summed into
 the annual C15 total.
 
-**Worked example.** You lend $80M to a $400M gas-fired power project
-(500 MW, 45% capacity factor, 0.37 tCO2/MWh — verify heat-rate-specific):
-annual ≈ `500 × 8,760 × 0.45 × 0.37 ≈ 729,000 tCO2e`.
-`Attribution = 80/400 = 20% → 145,800 tCO2e/yr` (score 2–3 by data source).
-At close, also disclose 20% × 25 yr ≈ 3.6 MtCO2e lifetime, separately.
+**Input provenance.** Total project value and your outstanding come from
+the financing documents; annual project emissions from project-specific
+activity data — metered fuel, or generation × a plant-specific
+(heat-rate-derived) intensity — score 2–3 by data source. At financial
+close of a new long-lived project, also disclose attribution × projected
+lifetime emissions as the separate line described above, never summed into
+the annual C15 total.
 
 ### 4. Commercial real estate and mortgages
 
@@ -201,15 +204,12 @@ Property emissions = floor area × energy intensity (by type/region) × EFs
                      (score 3–4) or actual metered energy (score 1–2)
 ```
 
-**Worked example — mortgage book.** 10,000 mortgages, average outstanding
-$240,000 against average origination value $400,000 (LTV share 60%);
-average property 5.5 tCO2e/yr (metered-sample + RECS-based intensity
-estimates — score 3–4 mix):
-
-```text
-Per loan: 0.60 × 5.5 = 3.3 tCO2e
-Book: 10,000 × 3.3 = 33,000 tCO2e
-```
+**Input provenance.** Loan outstanding and origination value from loan
+systems — the LTV-share attribution is fixed at the origination value.
+Property emissions from actual metered energy × EFs (score 1–2) or from
+floor area × building-type/EPC-label intensity (RECS/CBECS in the US, EPC
+registries in the EU/UK — score 3–4). Per loan: LTV share × property
+emissions; sum across the book, tracking the score mix.
 
 **Pitfalls:** PCAF fixes the property value **at origination** (updating
 the denominator to current values while outstanding amortizes would
@@ -224,10 +224,10 @@ Attribution = outstanding ÷ vehicle value at origination
 Financed emissions = attribution × (annual km × fuel consumption × fuel EF)
 ```
 
-E.g., $18,000 outstanding on a $30,000 vehicle (60%), driven 13,500 km/yr
-at 7.8 L/100 km gasoline: `13,500 × 0.078 × 2.34 kgCO2e/L ≈ 2.46 t/yr ×
-0.60 = 1.48 tCO2e` per loan. National statistics for km and consumption →
-score 4; telematics/odometer → better.
+**Input provenance.** Outstanding and vehicle value from origination
+records; annual km and fuel consumption from national transport statistics
+(score 4) or telematics/odometer data (better); fuel EF from the market's
+factor source, current edition.
 
 ### 6. Sovereign debt
 
@@ -238,9 +238,7 @@ Financed emissions = attribution × country production emissions
 
 Country emissions from UNFCCC inventories/EDGAR (production basis;
 LULUCF included and excluded reported as separate lines per PCAF 2nd ed.).
-PPP-adjusted GDP from IMF WEO/World Bank. Example: $500M of bonds of a
-country with PPP GDP $3.0T and 450 MtCO2e (excl. LULUCF):
-`(500e6/3.0e12) × 450e6 = 75,000 tCO2e`.
+PPP-adjusted GDP from IMF WEO/World Bank, matched to the emissions year.
 
 ### 7. Managed investments / AUM (optional under 2011 Standard)
 
@@ -271,10 +269,10 @@ Note WACI (a TCFD metric) uses **portfolio weights, not attribution
 factors** — it is not a financed-emissions measure and must not be summed
 with or substituted for the absolute total. Label each metric distinctly.
 
-## Emission factors / parameters quick reference
+## Emission factor and parameter sources
 
-All values require **verification against current editions**; record
-source/vintage/units per the `ghg-protocol` skill §7.
+Record source, edition/vintage, and units for every input per the
+`ghg-protocol` skill §7.
 
 **Denominator/financial data:**
 
@@ -316,10 +314,13 @@ tables per asset class before assigning scores):
 | Investee reported S1+S2 | CDP responses (annual), annual/sustainability reports, ESG vendors | 1 (verified) / 2 (unverified) |
 | Sector production intensities (t/t product, t/MWh) | GCCA GNR (cement), worldsteel, IEA (power) — latest year | 3 |
 | Sector revenue intensities (tCO2e/$M) | EXIOBASE (v3.x), USEEIO (v2.x), PCAF EF database (member access) — verify versions | 4–5 |
-| Building intensities | RECS 2020 / CBECS 2018 (EIA); EU EPC registries | 3–4 |
-| Vehicle use statistics | National transport statistics (e.g., FHWA ~11,500 mi/yr US — verify) | 4 |
+| Building intensities | RECS / CBECS (EIA, current survey cycles); EU EPC registries | 3–4 |
+| Vehicle use statistics | National transport statistics (e.g., US FHWA annual VMT series — current year) | 4 |
 | Country inventories | UNFCCC CRF submissions; EDGAR (annual) | 2–3 |
-| Grid factors for investee S2 estimates | eGRID 2023; IEA (latest) | — |
+| Grid factors for investee S2 estimates | eGRID (biennial data releases); IEA (latest) | — |
+
+This skill intentionally quotes no factor values. When a quantitative
+answer is needed, pull the current-year value from the named source.
 
 ## Unit and conversion traps
 
@@ -354,18 +355,21 @@ tables per asset class before assigning scores):
 
 ## Worked FAQ
 
-**Q1. We hold 2% of a listed utility (position $40M, EVIC $2.0B). The
-utility reports S1+S2 of 12,000,000 tCO2e (assured). Financed emissions?**
-`40e6 / 2.0e9 = 2.0%; 0.02 × 12,000,000 = 240,000 tCO2e`, DQ score 1. Note
-this one position may exceed a mid-size bank's entire operational footprint —
-normal for C15.
+**Q1. We hold a small stake in a listed utility that reports assured
+S1+S2. Financed emissions?**
+Attribution = position value ÷ the utility's EVIC (fiscal-year-aligned
+components from issuer financials or data vendors), × the reported assured
+S1+S2 → DQ score 1. Expect the result to dwarf your operational footprint —
+a single utility position routinely exceeds a mid-size bank's entire
+scopes 1+2; that is normal for C15.
 
-**Q2. Private borrower, $15M drawn of a $20M facility; equity $25M, debt
-$75M; no emissions data; revenue $120M in plastics manufacturing.**
-Attribution on drawn: `15/(25+75) = 15%`. Score-4 estimate: revenue ×
-sector intensity, e.g., 120 $M × ~350 tCO2e/$M (EXIOBASE v3.x
-plastics sector, region-matched — verify version and factor) = 42,000 t.
-`0.15 × 42,000 = 6,300 tCO2e`, DQ score 4. The undrawn $5M is excluded.
+**Q2. Private borrower, facility partly drawn, no emissions data. Method?**
+Attribution on the drawn amount only ÷ (borrower book equity + total debt),
+same fiscal year; the undrawn commitment is excluded under PCAF. With no
+reported or physical-activity data, fall back to score 4: borrower revenue
+× a region-matched sector revenue intensity (EXIOBASE / USEEIO / PCAF EF
+database — record the version). Flag the record as estimated and fold it
+into the exposure-weighted DQ score.
 
 **Q3. Our equity stake is 60% but we use operational control and don't
 operate the company. Scope 1 or C15?**
@@ -383,11 +387,13 @@ attribution shrank. Report the number per PCAF but decompose the change in
 the narrative; consider also disclosing an intensity metric and DQ scores so
 readers see no real-economy decarbonization occurred.
 
-**Q5. Mortgage book: 25,000 loans, avg outstanding $210k, origination value
-$350k, average property 6.2 tCO2e/yr (EPC-based, score 4). Total?**
-`(210/350) = 60%; 0.60 × 6.2 = 3.72 t/loan; × 25,000 = 93,000 tCO2e`.
-Improving to metered data (utility partnerships) moves score 4 → 2 and
-typically shifts the estimate materially — disclose the method change.
+**Q5. Mortgage book on EPC-based estimates — how does it improve?**
+Per loan, attribution = outstanding ÷ property value at origination
+(fixed); property emissions from EPC-label or floor-area intensity
+estimates score 3–4. Moving to actual metered energy (utility-data
+partnerships) moves the book toward score 1–2 and typically shifts the
+estimate materially — disclose it as a method change and track the
+exposure-weighted score YoY.
 
 **Q6. Do we include our investees' scope 3?**
 Per the Scope 3 Standard: where significant ("should"). Per PCAF 2nd ed.:
