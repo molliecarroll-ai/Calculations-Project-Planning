@@ -90,6 +90,19 @@ confidence (n ≈ 96 for large populations, more for stratification by site).
 Avoid seasonal bias (a January survey overstates driving in snow markets);
 ask about a "typical week" or survey mid-season.
 
+**Minimum viable question set** (keep it under ~8 questions; response rate
+falls with length):
+
+1. Which site do you normally work at? (extrapolation stratum)
+2. In a typical week, how many days are you on-site? (0–5+)
+3. What is your usual **one-way** distance home→work? (or home postcode)
+4. Primary mode for most of that distance? (drive alone / carpool / motorcycle /
+   bus / rail-metro / cycle / walk / other)
+5. If carpool: how many people usually share the vehicle (including you)?
+6. If car: fuel type (petrol/gasoline, diesel, hybrid, plug-in hybrid, EV)?
+7. Secondary mode, if your trip is multimodal (e.g., drive to station + rail)?
+8. Weeks worked at this pattern this year (captures leave/part-year hires)?
+
 **Extrapolation:**
 
 ```
@@ -265,7 +278,14 @@ is **scope 1** (owned/operated), not category 7. Employees' travel from home
 to the shuttle stop in their own cars remains category 7. A contracted
 third-party shuttle would instead sit in category 7.
 
-**Q6. Survey response was 12% — can we still use it?** Use with caution:
+**Q6. Multimodal commuter: drives 8 km to a station, then 35 km by rail,
+190 on-site days.** Compute each segment with its own factor:
+car 8 × 2 × 190 = 3,040 vkm × 0.17 = 517 kgCO2e; rail 35 × 2 × 190 =
+13,300 pkm × 0.035 = 466 kgCO2e. Total ≈ **0.98 tCO2e/yr**. Collapsing the
+whole 43 km to "rail" would understate by ~35%; to "car" would overstate
+~2.9×. This is why the survey asks for a secondary mode.
+
+**Q7. Survey response was 12% — can we still use it?** Use with caution:
 extrapolate but flag the response rate, compare mode split against national
 statistics for the geography, and consider blending with average-data. Plan
 incentives to lift response next cycle; assurance providers routinely

@@ -138,6 +138,23 @@ factors embed UK-average utilization and empty-return assumptions, so don't
 apply a separate empty-running uplift on top; double-counting the leg the
 reporter paid for (that one is c4).
 
+**Multi-echelon modeling discipline.** When goods pass through several
+downstream stages, build the model as a table of (echelon, share of sold
+tonnes, mode, distance) and let unknown lower echelons default to national
+averages. Example structure for a consumer-goods seller (ex-works):
+
+```
+Echelon                     Tonnes basis        Mode       Distance source
+gate → customer DC          100% of sold t      road       ship-to addresses
+customer DC → retail store  retail-channel t    road       national avg (e.g., 60–100 km)
+retail → consumer           optional            car        excluded (disclosed)
+export leg                  export t            sea/air    port-pair distances
+```
+
+Sum tonne-km per row, apply mode EFs, and record each row's data-quality tier
+separately — the first echelon is usually tier 2 (real addresses), the lower
+ones tier 3–4 (modeled). Disclose the blend per `ghg-protocol` §3.
+
 ### Method 3 — Spend-based
 
 ```
@@ -271,6 +288,15 @@ disclose either way.
 it's outbound?** No — **category 4**. Payment/procurement, not direction,
 decides. The 3PL's warehousing you pay for is likewise c4 (or scope 1/2 if
 you operate the site).
+
+**Q7. Cold chain: customers distribute our frozen product — anything beyond
+the truck fuel?** Yes, two additions: refrigeration-unit fuel/energy (reefer
+factors run roughly 15–25% above ambient per t-km — DESNZ publishes
+refrigerated HGV factors; verify) and **refrigerant leakage** from reefer
+units and cold stores (scope 1 of the downstream party, in your c9
+allocation). For frozen goods, cold-store dwell can rival transport: e.g.,
+5,000 t × 6 weeks × 4 kgCO2e/t-week (frozen-store intensity, 3PL-derived;
+verify) = 120 tCO2e.
 
 ## References
 
