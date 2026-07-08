@@ -8,8 +8,8 @@ description: >-
   or virtual/VPPA), green tariffs, supplier-specific emission rates, residual
   mix (AIB / Green-e), renewable energy claims, on-site solar netting, EV
   charging electricity, tenant/landlord electricity splits, and grid emission
-  factor selection (eGRID, IEA). For purchased steam, district heating/cooling,
-  or CHP allocation use `s2-steam-heat-cooling` instead.
+  factor source selection (eGRID, IEA). For purchased steam, district
+  heating/cooling, or CHP allocation use `s2-steam-heat-cooling` instead.
 ---
 
 # Scope 2 — Purchased Electricity
@@ -70,10 +70,10 @@ classification calls:
   emissions of resold power are **scope 3 category 3** for the reseller, not
   scope 2. Only the portion the utility itself consumes is its scope 2.
 - **Transmission & distribution (T&D) losses** on purchased electricity →
-  **scope 3 category 3** for end consumers (≈5% of delivered kWh in the US,
-  eGRID grid gross loss ~4.7–5%; verify current eGRID). Exception: utilities
-  reporting T&D losses on power they purchase and resell report those losses
-  in scope 2 (see `s3-c03-fuel-energy-related`).
+  **scope 3 category 3** for end consumers (a few percent of delivered kWh in
+  the US; eGRID publishes the grid gross loss rate — pull the current
+  release). Exception: utilities reporting T&D losses on power they purchase
+  and resell report those losses in scope 2 (see `s3-c03-fuel-energy-related`).
 
 ## Dual reporting — the core requirement
 
@@ -172,30 +172,18 @@ subregion by service address zip code / plant location using EPA **Power
 Profiler** (or the eGRID subregion GIS shapefiles for precision near
 boundaries). Use the subregion **total output emission rates** (annual, all
 generation) — not the non-baseload rates, which are for avoided-emissions
-analysis, not inventories. Include CH4 and N2O (eGRID publishes lb/MWh rates;
-eGRID also publishes a combined CO2e rate — prefer it) and state the GWP set
-per `ghg-protocol` §4.
+analysis, not inventories. Include CH4 and N2O (eGRID publishes per-gas
+lb/MWh rates and a combined CO2e rate — prefer the CO2e rate) and state the
+GWP set per `ghg-protocol` §4.
 
-- eGRID2022 US-average annual total output rate ≈ **818 lb CO2/MWh** ≈
-  **0.371 kg CO2/kWh** (818 × 0.4536 / 1,000). Source: EPA eGRID2022
-  (released 2024); approximate — verify the current release.
-- **Vintage lag**: eGRID data year trails release by ~2 years (eGRID2022
-  released Jan 2024). Convention: use the most recent release available for
+- **Location-based factor source**: EPA eGRID, total output emission rate
+  for the assigned subregion, lb/MWh, updated annually with a ~2-year
+  data-vintage lag. Convention: use the most recent release available for
   the reporting year and disclose the data-year mismatch; do not restate
   unless a base-year trigger applies (`ghg-protocol` §6).
 - **Non-US grids**: IEA Emission Factors database (annual; licensed) country
   factors; national publications where superior (UK DESNZ/DEFRA grid factor,
   Canada NIR provincial factors, Australia NGA factors, Japan METI/MoE).
-
-**Worked example (location-based)** — Atlanta office, calendar-2025 invoices
-total 2,400,000 kWh; zip maps to eGRID subregion **SRSO**, illustrative
-eGRID2022 total output rate ≈ 852 lb CO2/MWh (verify current eGRID):
-
-```
-EF = 852 lb/MWh × 0.4536 kg/lb ÷ 1,000 kWh/MWh = 0.3865 kg CO2/kWh
-Emissions = 2,400,000 kWh × 0.3865 kg/kWh = 927,542 kg ≈ 928 t CO2
-(+ CH4/N2O via eGRID CO2e rate — typically <1% additional)
-```
 
 **Market-based calculation mechanics**:
 
@@ -210,21 +198,23 @@ Instrument-covered MWh can never exceed consumption MWh in the market where
 the instruments are applied; excess certificates carry no scope 2 benefit
 (they may support separate voluntary claims but do not go below zero).
 
-**Worked dual-reporting example** — Midwest plant (RFCW), 10,000 MWh consumed
-in 2025; company purchases and retires 6,000 MWh of wind RECs (same-year
-vintage, US market):
+**Dual-reporting walk-through** (symbolic) — a facility consumes `C` MWh in
+the reporting year and retires `R` MWh of same-market, vintage-eligible wind
+RECs, with `R ≤ C`:
 
 ```
 Location-based:
-  EF_RFCW ≈ 1,001 lb CO2/MWh (illustrative eGRID2022; verify)
-          = 1,001 × 0.4536 / 1,000 = 0.454 kg CO2/kWh = 0.454 t CO2/MWh
-  = 10,000 MWh × 0.454 t/MWh = 4,540 t CO2   ← unchanged by the RECs
+  E_LB = C × EF_grid
+    EF_grid: subregion total output rate, current eGRID release (Power
+    Profiler assignment); convert lb/MWh → t/MWh (× 0.4536 / 1,000)
+    ← unchanged by the RECs
 
 Market-based:
-  6,000 MWh × 0 t/MWh (wind REC direct rate)            =     0 t
-  4,000 MWh × 0.50 t CO2/MWh (illustrative Green-e
-      residual mix for the region; verify current year)  = 2,000 t
-  Market-based total                                     = 2,000 t CO2
+  E_MB = R × EF_instrument + (C − R) × EF_RM
+    EF_instrument: generator direct rate conveyed by the certificate
+      (zero for wind/solar/hydro; may be non-zero for biomass)
+    EF_RM: residual mix for the consumption market — Green-e (US) or AIB
+      (Europe), current release; grid average with disclosure if none exists
 ```
 
 Report both totals; neither replaces the other. Note the residual mix rate
@@ -235,7 +225,7 @@ above — location-based.
 **Pitfalls**: using non-baseload rates; using state-average instead of
 subregion rates; treating a VPPA financial settlement as a claim without REC
 retirement; netting on-site solar exports against consumption while also
-selling the RECs; applying US-average factor to facilities in low-carbon
+selling the RECs; applying a US-average factor to facilities in low-carbon
 subregions (overstates) or coal-heavy ones (understates).
 
 ### Method 3 — Estimated kWh (floor area or spend)
@@ -246,24 +236,19 @@ kWh_est = electricity spend ($) ÷ average retail tariff ($/kWh)   [fallback]
 Emissions = kWh_est × EF_grid
 ```
 
-Intensity benchmarks: CBECS 2018 electricity intensities (approximate; verify
-current CBECS / ENERGY STAR Portfolio Manager technical reference), e.g.,
-office ≈ 15 kWh/ft²·yr, warehouse ≈ 6.5, non-mall retail ≈ 13, lodging ≈ 12,
-inpatient healthcare ≈ 29, food service ≈ 44. Tariff fallback: EIA average US
-commercial retail price ≈ $0.127/kWh (2023; varies 2× by state — use the
-state figure; verify current EIA data).
+Intensity benchmarks: CBECS electricity intensities by building type (pull
+the current CBECS tables or the ENERGY STAR Portfolio Manager technical
+reference; offices commonly run ~10–20 kWh/ft²·yr — see QA sanity ranges).
+Tariff fallback: EIA average retail commercial price for the facility's
+**state** (current year) — state prices vary ~2×, so never use the national
+figure when the state is known.
 
-**Worked example** — 40,000 ft² leased office, landlord provides no data,
-NYUP subregion (illustrative ≈ 236 lb CO2/MWh ≈ 0.107 kg/kWh; verify):
-
-```
-kWh_est = 40,000 ft² × 15 kWh/ft²·yr = 600,000 kWh
-Emissions = 600,000 kWh × 0.107 kg/kWh = 64,200 kg ≈ 64 t CO2
-```
-
-Flag as estimated (data-quality rubric, `ghg-protocol` §8). Pitfall: applying
-whole-building intensity to a partial-floor tenancy without prorating, or
-using a national tariff in a high-price state (halves apparent kWh).
+Walk-through (symbolic): `A` = leased area (ft², prorated to the tenancy),
+`I` = benchmark intensity for the building type → `kWh_est = A × I`,
+`E = kWh_est × EF_grid` (subregion factor as in Method 2). Flag as estimated
+(data-quality rubric, `ghg-protocol` §8). Pitfall: applying whole-building
+intensity to a partial-floor tenancy without prorating, or using a national
+tariff in a high-price state (halves apparent kWh).
 
 ### Method 4 — Full proxy
 
@@ -271,41 +256,32 @@ using a national tariff in a high-price state (halves apparent kWh).
 kWh_est = headcount (FTE) × prior-year kWh/FTE      (or revenue × kWh/$)
 ```
 
-Screening only. Example: new 120-FTE sales office; portfolio office intensity
-last year 4,800 kWh/FTE → 576,000 kWh × local grid EF. Replace with invoices
-next cycle; flag the value.
+Screening only. Derive the intensity from the portfolio's own prior-year
+data for comparable sites, apply the local grid factor, replace with
+invoices next cycle, and flag the value.
 
-## Emission factors quick reference
+## Emission factor sources
 
-**eGRID2022 annual total output CO2 rates — representative subregions**
-(approximate values for orientation; always pull the current eGRID release):
+| Source | Governing table / series | Coverage | Units convention | Cadence |
+|---|---|---|---|---|
+| EPA eGRID | Subregion **total output** emission rates (CO2, CH4, N2O, and combined CO2e); Power Profiler for zip-to-subregion | US, by eGRID subregion | lb/MWh | Annual release; ~2-year data-vintage lag |
+| IEA Emission Factors | Country grid factors, CO2 and CO2e | Non-US national grids | per kWh | Annual; licensed; verify vintage vs reporting year |
+| Green-e Residual Mix Emissions Rates | US regional residual mix (typically above grid average) | US, by region/eGRID grouping | lb CO2e/MWh | Annual |
+| AIB European Residual Mixes | Per-country residual mix, direct + LCA variants — use "direct" for scope 2 | Europe (AIB domain) | g CO2/kWh | Annual, ~May release for prior year |
+| Supplier fuel-mix disclosures | Product/supplier emission rate, certificate-adjusted | Contracted supply | per supplier disclosure | Annual |
+| National publications | UK DESNZ/DEFRA grid factor; Canada NIR provincial; Australia NGA; Japan METI/MoE | Respective countries | per national convention | Annual |
 
-| Subregion | Area | lb CO2/MWh | kg CO2/kWh |
-|---|---|---|---|
-| US average | — | ~818 | ~0.371 |
-| CAMX | California | ~496 | ~0.225 |
-| ERCT | Texas (ERCOT) | ~771 | ~0.350 |
-| RFCW | Ohio Valley / Midwest | ~1,001 | ~0.454 |
-| MROW | Upper Midwest | ~937 | ~0.425 |
-| NYUP | Upstate New York | ~236 | ~0.107 |
-| NWPP | Pacific Northwest | ~605 | ~0.274 |
+eGRID also publishes the US **grid gross loss** rate used for scope 3
+category 3 T&D losses (see `s3-c03-fuel-energy-related`).
 
-Source: EPA eGRID2022 (2024 release), annual total output emission rates,
-CO2 only — add CH4/N2O (or use eGRID CO2e rates). **Verify against the
-current eGRID publication before use.**
-
-| Item | Value / note | Source |
-|---|---|---|
-| Non-US grid factors | Country-level CO2 and CO2e per kWh, annual | IEA Emission Factors (current edition; licensed) — verify vintage vs reporting year |
-| US residual mix | Regional lb CO2e/MWh; typically > grid average | Green-e Residual Mix Emissions Rates (annual; verify current) |
-| European residual mix | Per-country g CO2/kWh, direct + LCA variants | AIB European Residual Mixes (annual, ~May release; use "direct" for scope 2) |
-| T&D grid gross loss (US) | ~4.7–5% of delivered kWh → scope 3 cat 3 | eGRID2022 (verify current) |
+This skill intentionally quotes no factor values. When a quantitative answer
+is needed, pull the current-year value from the named source.
 
 ## Unit and conversion traps
 
 - **lb/MWh → kg/kWh**: multiply by 0.4536 (kg per lb), divide by 1,000 (kWh
-  per MWh). 818 lb/MWh × 0.4536 / 1,000 = 0.371 kg/kWh. Dividing by 2,204.62
-  alone gives kg/**MWh** ÷ 1,000 — same result, but do it once, not twice.
+  per MWh) — i.e., kg/kWh = lb/MWh × 0.0004536. Dividing by 2,204.62 alone
+  gives kg/**MWh** ÷ 1,000 — same result, but do it once, not twice.
 - **MWh vs kWh**: 1 MWh = 1,000 kWh. The classic 1,000× error — check that
   invoice units (usually kWh) match the factor denominator.
 - **kW vs kWh**: demand (kW) charges on invoices are not energy; never sum
@@ -365,21 +341,26 @@ attestations, green-tariff confirmations, **supplier fuel-mix disclosures**
 
 ## Worked FAQ
 
-**Q1. Our German office consumed 800 MWh and bought no GOs. What goes in each
-total?**
-Location-based: 800 MWh × the German grid-average factor (IEA or UBA;
-illustrative ≈ 0.38 t CO2/MWh, verify current) ≈ 304 t CO2. Market-based:
-Germany is an instrument market, so use the **AIB German residual mix**
-(illustrative ≈ 0.55 t CO2/MWh direct, verify current AIB release):
-800 × 0.55 ≈ **440 t CO2**. Market-based exceeds location-based because
-tracked renewable attributes are removed from the residual mix.
+**Q1. Our German office consumed electricity and bought no GOs. What goes in
+each total?**
+Location-based: consumption × the German grid-average factor (IEA country
+factor, or a superior national publication), current vintage. Market-based:
+Germany is an instrument market, so untracked consumption takes the **AIB
+German residual mix** (direct variant, current release) — not the grid
+average. Expect market-based to exceed location-based, because tracked
+renewable attributes are stripped out of the residual mix; that outcome is
+correct, not an error.
 
-**Q2. We have 10,000 MWh consumption, 6,000 MWh retired wind RECs — both
-totals?**
-See the worked dual-reporting example above: location-based ≈ 4,540 t CO2
-(RFCW illustrative 0.454 t/MWh — RECs change nothing); market-based = 6,000 ×
-0 + 4,000 × residual mix (illustrative 0.50 t/MWh) = **2,000 t CO2**. Report
-both, cite factor sources and vintages.
+**Q2. We have consumption in one US market and retired wind RECs covering
+part of it — how do the two totals work?**
+Follow the dual-reporting walk-through above. Location-based: full
+consumption × the subregion total output rate (current eGRID) — the RECs
+change nothing. Market-based: REC-covered MWh at the certificate's conveyed
+direct rate (zero for wind) plus the uncovered remainder at the current
+Green-e residual mix for the region. Before crediting the RECs, confirm the
+Quality Criteria: same market as the load, vintage within the accepted
+window, retirement statement naming the reporting entity as beneficiary.
+Report both totals with factor sources and vintages.
 
 **Q3. Our VPPA settled 20,000 MWh but the project registry shows no REC
 retirement to us. Can we claim it?**
@@ -389,23 +370,22 @@ conveys no attribute. Fix the contract administration (retirement in your
 name or to your beneficiary account), then claim the retired vintage-matched
 MWh.
 
-**Q4. Rooftop solar generated 1,200 MWh; we consumed 900 MWh on-site,
-exported 300 MWh, and sold all the RECs. Scope 2 impact?**
-The 900 MWh self-consumed cannot be claimed as renewable (RECs sold). Market-
-based: 900 MWh × residual mix. Location-based: convention is that self-
-generated self-consumed electricity is not "purchased," so most reporters
-apply the grid factor only to grid **imports**; if you include self-consumed
-MWh in the market-based total at residual mix (required by the no-double-
-claiming rule when RECs are sold), disclose the treatment. The 300 MWh
-exported are not your scope 2. At an illustrative residual mix of
-0.50 t/MWh: 900 × 0.50 = **450 t CO2** added to market-based.
+**Q4. Rooftop solar generated more than we consumed on-site; we exported the
+surplus and sold all the RECs. Scope 2 impact?**
+The self-consumed MWh cannot be claimed as renewable (RECs sold). Market-
+based: self-consumed MWh × residual mix. Location-based: convention is that
+self-generated self-consumed electricity is not "purchased," so most
+reporters apply the grid factor only to grid **imports**; if you include
+self-consumed MWh in the market-based total at residual mix (required by the
+no-double-claiming rule when RECs are sold), disclose the treatment. The
+exported MWh are not your scope 2.
 
 **Q5. Landlord bills us a fixed rate per ft² with no kWh — what do we do?**
-Method 3: estimate kWh from your leased area × CBECS-type intensity (e.g.,
-25,000 ft² × 15 kWh/ft² = 375,000 kWh), apply the local subregion factor, and
-flag as estimated. In parallel, request a landlord statement or submeter —
-this is also the data you need for any future market-based instrument
-matching.
+Method 3: estimate kWh from your leased area × a CBECS-type intensity for
+the building type (prorated to your tenancy), apply the local subregion
+factor, and flag as estimated. In parallel, request a landlord statement or
+submeter — this is also the data you need for any future market-based
+instrument matching.
 
 **Q6. Which eGRID rate column do we use — total output or non-baseload?**
 **Total output** annual rates for inventory accounting. Non-baseload rates
@@ -426,6 +406,6 @@ emissions and is a common assurance finding.
 - **IEA Emission Factors** database (annual; non-US grid factors).
 - **AIB European Residual Mixes** (annual); **Green-e** Residual Mix Emissions
   Rates and Green-e Energy National Standard (vintage windows).
-- CBECS (EIA, 2018) / ENERGY STAR Portfolio Manager (intensity benchmarks).
+- CBECS (EIA) / ENERGY STAR Portfolio Manager (intensity benchmarks).
 - Cross-cutting conventions: the `ghg-protocol` skill (GWPs §4, base year §6,
   EF hierarchy §7, data quality §8).

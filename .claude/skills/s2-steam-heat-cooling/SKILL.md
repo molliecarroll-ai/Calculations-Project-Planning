@@ -77,15 +77,11 @@ CHP-allocated (and by which method — efficiency method preferred), and
 whether it is per unit generated or delivered.
 
 ```
-Emissions (t CO2e) = steam purchased (MMBtu) × EF_supplier (kg CO2e/MMBtu) / 1,000
-```
-
-**Worked example** — hospital purchases 12,000 MMBtu of district steam;
-supplier discloses 0.0700 t CO2e/MMBtu delivered (gas-fired CHP, efficiency-
-method allocation, 2025 data):
-
-```
-Emissions = 12,000 MMBtu × 0.0700 t CO2e/MMBtu = 840 t CO2e
+Inputs:  Q = purchased quantity (MMBtu; convert klb/GJ/ton-hours first —
+             see Unit traps), from invoices or BTU meters
+         EF_supplier = supplier's annual factor (kg CO2e/MMBtu; confirm
+             CO2 vs CO2e, generated vs delivered basis, allocation method)
+Result:  Emissions (t CO2e) = Q × EF_supplier / 1,000
 ```
 
 Pitfalls: supplier factor in CO2 vs CO2e (ask); per-generated factors applied
@@ -94,13 +90,12 @@ enthalpy (see Unit traps).
 
 ### Method 2 — Metered quantity × default factor
 
-Default factors assume a fuel and a boiler efficiency. The US EPA GHG
-Emission Factors Hub "Steam and Heat" row (verify current edition):
-
-- CO2 **66.33 kg/MMBtu**, CH4 **1.25 g/MMBtu**, N2O **0.125 g/MMBtu** —
-  derived from natural gas combustion (53.06 kg CO2/MMBtu HHV) at an assumed
-  **80% boiler efficiency** (53.06 / 0.80 = 66.33). If the district system
-  burns other fuels (coal, oil, biomass), build your own:
+Default factors assume a fuel and a boiler efficiency. Default source: the
+US EPA GHG Emission Factors Hub **"Steam and Heat"** row — CO2 (kg/MMBtu)
+plus CH4 and N2O (g/MMBtu), updated annually; pull the current edition. Its
+basis: the natural gas HHV combustion factor (EPA Hub / 40 CFR 98 Table C-1)
+divided by an assumed **80% boiler efficiency**. If the district system
+burns other fuels (coal, oil, biomass), build your own:
 
 ```
 EF_steam (kg CO2/MMBtu delivered heat)
@@ -108,19 +103,23 @@ EF_steam (kg CO2/MMBtu delivered heat)
 Emissions = quantity (MMBtu) × EF_steam / 1,000     [t CO2]
 ```
 
-**Worked example** — 12,000 MMBtu purchased steam, no supplier data, gas
-district plant assumed, AR5 GWPs (CH4 = 28, N2O = 265; `ghg-protocol` §4):
+**Method walk-through** (symbolic) — purchased steam `Q` MMBtu, no supplier
+data, gas district plant assumed:
 
 ```
-CO2:  12,000 MMBtu × 66.33 kg/MMBtu   = 795,960 kg = 796.0 t CO2
-CH4:  12,000 × 1.25 g  = 15.0 kg × 28  = 0.42 t CO2e
-N2O:  12,000 × 0.125 g = 1.5 kg × 265  = 0.40 t CO2e
-Total ≈ 796.8 t CO2e (EPA Hub factors, current edition — verify; AR5 GWPs)
+Inputs:  EF_CO2 (kg/MMBtu), EF_CH4, EF_N2O (g/MMBtu)
+             — EPA Hub "Steam and Heat" row, current edition
+         GWP_CH4, GWP_N2O — GWP set per `ghg-protocol` §4
+CO2:   Q × EF_CO2 / 1,000                          [t CO2]
+CH4:   Q × EF_CH4 / 1,000 (kg) × GWP_CH4 / 1,000   [t CO2e]
+N2O:   Q × EF_N2O / 1,000 (kg) × GWP_N2O / 1,000   [t CO2e]
+Total = sum; state the Hub edition and GWP set used
 ```
 
 Pitfalls: applying the natural-gas-basis Hub factor to a coal-fired district
-system (understates ~40–70%); applying fuel factors without the efficiency
-divisor (understates 20–25%); LHV/NCV fuel factors against HHV US quantities
+system (substantially understates); applying fuel factors without the
+efficiency divisor (understates by the efficiency shortfall — ~20–25% at the
+default 80% assumption); LHV/NCV fuel factors against HHV US quantities
 (`ghg-protocol` §7).
 
 **Chilled water** — if the supplier provides no factor, convert thermal
@@ -129,7 +128,8 @@ cooling to the driving energy:
 ```
 Electric chillers:
   kWh_electric = ton-hours × 3.517 kWh_th/ton-hour ÷ COP
-  Emissions    = kWh_electric × EF_grid (kg CO2e/kWh)
+  Emissions    = kWh_electric × EF_grid (kg CO2e/kWh, current release —
+                 see `s2-purchased-electricity`)
   (COP ≈ 4–6 for large electric centrifugal chillers; ask the supplier)
 
 Absorption chillers (heat-driven):
@@ -137,42 +137,32 @@ Absorption chillers (heat-driven):
   (COP_th ≈ 0.7 single-effect, ≈ 1.2 double-effect), then apply the steam EF
 ```
 
-**Worked example** — 500,000 ton-hours of district chilled water, electric
-plant, supplier-stated COP 5.0, US-average grid factor ≈ 0.371 kg CO2/kWh
-(eGRID2022, verify current — see `s2-purchased-electricity`):
-
-```
-kWh_th = 500,000 ton-hours × 3.517 = 1,758,500 kWh thermal
-kWh_e  = 1,758,500 ÷ 5.0           = 351,700 kWh electric
-Emissions = 351,700 × 0.371 kg/kWh = 130,481 kg ≈ 130 t CO2
-```
-
 Pitfall: applying the grid factor directly to thermal ton-hour-derived kWh
-without dividing by COP (overstates ~5×).
+without dividing by COP (overstates by roughly the COP, i.e., ~4–6×).
 
 ### Method 3 — Floor-area estimation
 
 ```
 MMBtu_est = floor area (ft²) × thermal intensity (kBtu/ft²·yr) / 1,000
+Emissions = MMBtu_est × EF (supplier-specific or Hub default, as above)
 ```
 
-Benchmarks: CBECS 2018 district-heat/space-heating intensities by building
-type and climate zone (approximate; verify current CBECS / Portfolio Manager
-technical reference) — offices on district heat in cold climates commonly
-~30–50 kBtu/ft²·yr. Example: 60,000 ft² Boston office × 40 kBtu/ft² =
-2,400 MMBtu × 66.33 kg/MMBtu ≈ 159 t CO2. Flag as estimated; prorate for
+Benchmarks: CBECS district-heat/space-heating intensities by building type
+and climate zone (verify the current CBECS / Portfolio Manager technical
+reference) — offices on district heat in cold climates commonly
+~30–50 kBtu/ft²·yr (sanity range). Flag as estimated; prorate for
 partial-floor tenancies and partial-year occupancy.
 
 ### Method 4 — Spend-based
 
 ```
 MMBtu_est = steam spend ($) ÷ unit price ($/MMBtu)
+Emissions = MMBtu_est × EF (as in Method 2)
 ```
 
-District steam prices vary widely (illustrative US range ~$20–40/MMBtu; NYC
-at the high end — use the actual tariff schedule if you have the supplier
-name). Example: $96,000 annual steam spend ÷ $32/MMBtu = 3,000 MMBtu ×
-66.33 kg/MMBtu ≈ 199 t CO2. Screening quality only.
+Use the supplier's actual tariff schedule for the unit price — district
+steam prices vary severalfold by city, so a generic national price badly
+distorts the estimate. Screening quality only.
 
 ## CHP allocation
 
@@ -205,41 +195,46 @@ E_power = E_total − E_heat
 State which method the supplier used; use the efficiency method with default
 efficiencies when allocating yourself, and disclose the assumed efficiencies.
 
-**Worked CHP allocation example** — gas-fired CHP: total emissions
-E_total = 60,000 t CO2/yr; outputs: steam delivered H = 500,000 MMBtu,
-electricity P = 100,000 MWh = 341,200 MMBtu (× 3.412 MMBtu/MWh). Efficiency
-method, default e_H = 0.80, e_P = 0.35:
+**CHP allocation walk-through** (efficiency method, symbolic):
 
 ```
-H / e_H = 500,000 / 0.80 = 625,000 MMBtu fuel-equivalent
-P / e_P = 341,200 / 0.35 = 974,857 MMBtu fuel-equivalent
-Heat share  = 625,000 / (625,000 + 974,857) = 39.1%
-E_heat  = 60,000 t × 0.391 = 23,441 t CO2  → EF_steam = 23,441 / 500,000
-        = 0.0469 t CO2/MMBtu (46.9 kg CO2/MMBtu)
-E_power = 36,559 t CO2                     → EF_elec  = 0.366 t CO2/MWh
+Inputs:  E_total = total plant GHG emissions (t CO2e/yr, from supplier or
+                   public reporting)
+         H = useful heat/steam delivered (MMBtu)
+         P = electricity output, converted to the same units
+             (MWh × 3.412 MMBtu/MWh)
+         e_H = 0.80, e_P = 0.35   (GHG Protocol CHP guidance defaults —
+                                    method-defining parameters)
+Steps:
+  F_H = H / e_H          fuel-equivalent of separate heat production
+  F_P = P / e_P          fuel-equivalent of separate power production
+  heat share = F_H / (F_H + F_P)
+  E_heat  = E_total × heat share;   EF_steam = E_heat / H    [t CO2e/MMBtu]
+  E_power = E_total − E_heat;       EF_elec  = E_power / P   [t CO2e/MWh]
+A customer buying Q MMBtu of this steam reports Q × EF_steam in scope 2.
 ```
 
-A customer buying 20,000 MMBtu of this steam reports 20,000 × 0.0469 =
-**938 t CO2** in scope 2. Note the CHP-allocated steam factor (46.9 kg/MMBtu)
-is *below* the 66.33 kg/MMBtu boiler default — cogeneration credit is real;
-using the default for CHP steam typically overstates.
+Note: an efficiency-method allocation for gas-fired CHP typically yields a
+steam factor **below** the EPA Hub boiler-basis default — cogeneration
+credit is real; applying the boiler default to CHP steam typically
+overstates.
 
-## Emission factors quick reference
+## Emission factor sources
 
-| Item | Value | Units | Source |
-|---|---|---|---|
-| Purchased steam/heat default — CO2 | 66.33 | kg CO2/MMBtu | EPA GHG Emission Factors Hub (current edition; natural-gas basis, 80% boiler efficiency) — verify |
-| Purchased steam/heat default — CH4 | 1.25 | g CH4/MMBtu | EPA Hub (verify current) |
-| Purchased steam/heat default — N2O | 0.125 | g N2O/MMBtu | EPA Hub (verify current) |
-| Natural gas combustion (HHV) | 53.06 | kg CO2/MMBtu | EPA Hub / 40 CFR 98 Table C-1 (verify) |
-| CHP default reference efficiencies | 35% power / 80% heat | — | GHG Protocol CHP allocation guidance |
-| Grid factor for electric chilled-water conversion | see `s2-purchased-electricity` | kg CO2/kWh | eGRID / IEA (current release) |
-| District cooling supplier factors | supplier-specific | kg CO2e/ton-hour or /kWh_th | request annually from provider |
+| Source | Governing table | Coverage | Units convention | Cadence |
+|---|---|---|---|---|
+| EPA GHG Emission Factors Hub | "Steam and Heat" row (CO2, CH4, N2O); natural-gas basis at an assumed 80% boiler efficiency | US purchased steam/heat default | kg CO2/MMBtu; g CH4, N2O/MMBtu (HHV) | Annual |
+| EPA Hub / 40 CFR Part 98 Table C-1 | Fuel combustion factors — build EF_fuel ÷ efficiency for non-gas systems | US fuels, HHV basis | kg/MMBtu | Annual (Hub); Part 98 as amended |
+| Supplier disclosure | District energy provider's annual factor letter (fuel mix, CHP allocation method, generated vs delivered basis) | Contracted supply | kg CO2e/MMBtu, /GJ, or /ton-hour | Request annually |
+| GHG Protocol CHP allocation guidance | Default reference efficiencies (35% power / 80% heat) — method parameters, not factors | CHP allocation | — | Static guidance |
+| UK DESNZ conversion factors | "Heat and steam" factor | UK district heat | kg CO2e/kWh | Annual |
+| IPCC 2006 GL / national fuel factors | Fuel factors ÷ plant efficiency for non-US systems | Non-US | NCV basis — convert (`ghg-protocol` §7) | Per publication |
+| Grid factors (electric chilled-water conversion) | see `s2-purchased-electricity` | — | kg CO2e/kWh | Annual |
 
-Non-US: derive from IPCC 2006 GL / national fuel factors ÷ plant efficiency,
-or use national district-heat factors where published (e.g., UK DESNZ "heat
-and steam" factor, updated annually). **Every factor: record source, year,
-units; verify against the current publication** (`ghg-protocol` §7).
+Record source, year, and units for every factor used (`ghg-protocol` §7).
+
+This skill intentionally quotes no factor values. When a quantitative answer
+is needed, pull the current-year value from the named source.
 
 ## Unit and conversion traps
 
@@ -299,8 +294,8 @@ and reference efficiencies used).
 - **Seasonality**: steam consumption should peak in winter months, chilled
   water in summer — a flat profile suggests estimated reads or unit errors.
 - **CHP factor reasonableness**: an efficiency-method gas-CHP steam factor
-  should land below the 66.33 kg CO2/MMBtu boiler default; well above it
-  implies coal fuel, energy-content allocation, or an error.
+  should land below the EPA Hub boiler-basis default; well above it implies
+  coal fuel, energy-content allocation, or an error.
 - **Unit audit**: confirm klb→MMBtu enthalpy, ton-hour→kWh_th, and COP
   application on a sample of invoices each cycle.
 - **No double counting**: fuel for own boilers not also counted as purchased
@@ -311,25 +306,30 @@ and reference efficiencies used).
 
 ## Worked FAQ
 
-**Q1. We buy 8,500 klb of Con Ed-type district steam. Emissions with no
-supplier factor?**
-Convert: 8,500 klb × 1.194 MMBtu/klb = 10,149 MMBtu. Apply EPA Hub defaults:
-CO2 = 10,149 × 66.33 kg = 673.2 t; CH4 = 12.7 kg × 28 = 0.36 t CO2e; N2O =
-1.27 kg × 265 = 0.34 t CO2e → **≈ 674 t CO2e** (EPA Hub current edition,
-AR5 GWPs — verify both). Better: request the utility's published steam
-factor, which reflects its actual CHP fleet and will likely differ.
+**Q1. We buy Con Ed-type district steam billed in klb. How do we account for
+it with no supplier factor?**
+Two steps: convert klb to energy (Portfolio Manager convention ≈ 1.194
+MMBtu/klb — but ask the supplier for the actual enthalpy basis), then apply
+the EPA Hub "Steam and Heat" defaults (current edition, CO2 + CH4 + N2O with
+your stated GWP set) per the Method 2 walk-through. Better: request the
+utility's published steam factor — large district systems typically publish
+one, it reflects the actual CHP fleet, and it moves you to Method 1.
 
-**Q2. Our supplier's CHP plant emitted 60,000 t CO2, produced 500,000 MMBtu
-steam and 100,000 MWh power; we bought 20,000 MMBtu. Our scope 2?**
-Efficiency method with defaults (e_H 0.80, e_P 0.35) allocates 39.1% to heat
-→ steam EF 0.0469 t CO2/MMBtu → 20,000 × 0.0469 = **938 t CO2** (full
-computation in the CHP section). Disclose the method and efficiencies.
+**Q2. Our supplier's CHP plant discloses total emissions, steam output, and
+power output; we bought part of the steam. Our scope 2?**
+Allocate with the efficiency method and the guidance defaults (e_H = 0.80,
+e_P = 0.35): convert power output to the same energy units, compute the
+fuel-equivalents H/e_H and P/e_P, take the heat share, derive EF_steam =
+allocated heat emissions ÷ delivered steam, and multiply by your purchased
+quantity (full walk-through in the CHP section). Disclose the method and
+efficiencies used.
 
-**Q3. District cooling invoice shows 120,000 ton-hours; supplier says
-electric chillers, COP 5.5, in CAMX. Emissions?**
-kWh_e = 120,000 × 3.517 ÷ 5.5 = 76,735 kWh; × 0.225 kg CO2/kWh (illustrative
-eGRID2022 CAMX, verify) = **≈ 17.3 t CO2**. If the supplier publishes its own
-kg CO2e/ton-hour factor, prefer it (Method 1).
+**Q3. District cooling invoice shows ton-hours; supplier says electric
+chillers with a stated COP. Emissions?**
+Convert down the chain: ton-hours × 3.517 → thermal kWh; ÷ the supplier's
+COP → electric kWh; × the current subregion grid factor (eGRID/IEA — see
+`s2-purchased-electricity`). If the supplier publishes its own kg
+CO2e/ton-hour factor, prefer it (Method 1).
 
 **Q4. Do purchased steam and heat get dual-reported like electricity?**
 Yes in principle — the Scope 2 Guidance covers all purchased energy. In
@@ -341,8 +341,9 @@ supplier factor exists.
 
 **Q5. Our landlord's gross lease includes steam heat with no meter — what
 now?**
-Method 3: leased 25,000 ft² Chicago office × ~45 kBtu/ft²·yr (CBECS-type
-benchmark, verify) = 1,125 MMBtu × 66.33 kg/MMBtu ≈ **75 t CO2**, flagged as
+Method 3: estimate MMBtu from your leased area × a CBECS-type district-heat
+intensity for the building type and climate zone, apply the Method 2 default
+(or a supplier factor if the building's provider publishes one), and flag as
 estimated. Ask the landlord for the building's steam total and your area
 share to move to Method 1/2 next year.
 
@@ -366,7 +367,7 @@ scope 2. Provide them the factor and method so the two inventories align.
   40 CFR Part 98 fuel factors.
 - **IPCC 2006 Guidelines** / national factors for non-US fuel bases; UK DESNZ
   heat-and-steam factor (annual).
-- CBECS (EIA, 2018) / ENERGY STAR Portfolio Manager technical reference
+- CBECS (EIA) / ENERGY STAR Portfolio Manager technical reference
   (thermal conversions incl. steam klb→MMBtu; intensity benchmarks).
 - Grid factors for chilled-water conversion: `s2-purchased-electricity`.
 - Cross-cutting conventions: the `ghg-protocol` skill (GWPs §4, base year §6,
